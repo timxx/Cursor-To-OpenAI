@@ -24,6 +24,204 @@ const {
 } = require('./utils.js');
 const { ToolExecutor } = require('./toolExecutor.js');
 
+/**
+ * Protobuf wire format decoder - ported from cursor_chat_proto.py
+ * See TASK-7-protobuf-schemas.md for schema documentation.
+ */
+class ProtobufDecoder {
+  static decodeVarint(data, pos) {
+    let result = 0;
+    let shift = 0;
+    while (pos < data.length) {
+      const b = data[pos];
+      result |= (b & 0x7F) << shift;
+      pos++;
+      if (!(b & 0x80)) break;
+      shift += 7;
+    }
+    return [result, pos];
+  }
+
+  static decodeField(data, pos) {
+    if (pos >= data.length) return [null, null, null, pos];
+    
+    const [tag, newPos] = this.decodeVarint(data, pos);
+    pos = newPos;
+    const fieldNum = tag >> 3;
+    const wireType = tag & 0x07;
+    
+    let value;
+    if (wireType === 0) { // Varint
+      [value, pos] = this.decodeVarint(data, pos);
+    } else if (wireType === 1) { // Fixed64
+      value = data.readBigUInt64LE(pos);
+      pos += 8;
+    } else if (wireType === 2) { // Length-delimited
+      const [length, newPos2] = this.decodeVarint(data, pos);
+      pos = newPos2;
+      value = data.slice(pos, pos + length);
+      pos += length;
+    } else if (wireType === 5) { // Fixed32
+      value = data.readUInt32LE(pos);
+      pos += 4;
+    } else {
+      value = null;
+    }
+    
+    return [fieldNum, wireType, value, pos];
+  }
+
+  static decodeMessage(data) {
+    const fields = {};
+    let pos = 0;
+    while (pos < data.length) {
+      const [fieldNum, wireType, value, newPos] = this.decodeField(data, pos);
+      if (fieldNum === null) break;
+      pos = newPos;
+      if (!fields[fieldNum]) fields[fieldNum] = [];
+      fields[fieldNum].push([wireType, value]);
+    }
+    return fields;
+  }
+
+  static getString(fields, fieldNum) {
+    if (fields[fieldNum]) {
+      for (const [wireType, value] of fields[fieldNum]) {
+        if (wireType === 2 && Buffer.isBuffer(value)) {
+          try {
+            return value.toString('utf-8');
+          } catch (e) {}
+        }
+      }
+    }
+    return null;
+  }
+
+  static getInt(fields, fieldNum) {
+    if (fields[fieldNum]) {
+      for (const [wireType, value] of fields[fieldNum]) {
+        if (wireType === 0) return value;
+      }
+    }
+    return null;
+  }
+
+  static getBytes(fields, fieldNum) {
+    if (fields[fieldNum]) {
+      for (const [wireType, value] of fields[fieldNum]) {
+        if (wireType === 2) return value;
+      }
+    }
+    return null;
+  }
+}
+
+/**
+ * Tool call decoder - ported from cursor_chat_proto.py
+ * Based on TASK-26-tool-schemas.md ClientSideToolV2Call
+ */
+class ToolCallDecoder {
+  static FIELD_TOOL = 1;
+  static FIELD_TOOL_CALL_ID = 3;
+  static FIELD_NAME = 9;
+  static FIELD_RAW_ARGS = 10;
+
+  static findToolCalls(data) {
+    const toolCalls = [];
+    
+    try {
+      const fields = ProtobufDecoder.decodeMessage(data);
+      
+      // Look for nested messages that might contain tool calls
+      for (const [fieldNum, values] of Object.entries(fields)) {
+        for (const [wireType, value] of values) {
+          if (wireType === 2 && Buffer.isBuffer(value) && value.length > 10) {
+            try {
+              const nested = ProtobufDecoder.decodeMessage(value);
+              const toolCall = this._extractToolCall(nested);
+              if (toolCall) toolCalls.push(toolCall);
+              
+              // Also check nested messages within
+              for (const [nf, nv] of Object.entries(nested)) {
+                for (const [nwt, nval] of nv) {
+                  if (nwt === 2 && Buffer.isBuffer(nval) && nval.length > 10) {
+                    try {
+                      const deep = ProtobufDecoder.decodeMessage(nval);
+                      const tc = this._extractToolCall(deep);
+                      if (tc) toolCalls.push(tc);
+                    } catch (e) {}
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+        }
+      }
+    } catch (e) {}
+    
+    return toolCalls;
+  }
+
+  static _extractToolCall(fields) {
+    const tool = ProtobufDecoder.getInt(fields, this.FIELD_TOOL);
+    const toolCallId = ProtobufDecoder.getString(fields, this.FIELD_TOOL_CALL_ID);
+    const name = ProtobufDecoder.getString(fields, this.FIELD_NAME);
+    const rawArgs = ProtobufDecoder.getString(fields, this.FIELD_RAW_ARGS);
+    
+    if (tool !== null && tool > 0 && toolCallId) {
+      return { tool, toolCallId, name: name || '', rawArgs: rawArgs || '' };
+    }
+    return null;
+  }
+}
+
+/**
+ * Response decoder for StreamUnifiedChatResponse
+ * 
+ * Actual wire format observed:
+ * - Field 2: nested Message containing:
+ *   - Field 1: content (string)
+ *   - Field 25: thinking (nested message with content at field 1)
+ *   - Field 22, 27: UUIDs
+ */
+class ResponseDecoder {
+  static FIELD_MESSAGE = 2;
+  static FIELD_CONTENT = 1;
+  static FIELD_THINKING = 25;
+
+  static decode(data) {
+    try {
+      const fields = ProtobufDecoder.decodeMessage(data);
+      
+      // Try direct text at field 1 first (TASK-7 schema)
+      let text = ProtobufDecoder.getString(fields, this.FIELD_CONTENT);
+      let thinking = null;
+      
+      // If no direct text, check nested message at field 2
+      if (!text) {
+        const messageBytes = ProtobufDecoder.getBytes(fields, this.FIELD_MESSAGE);
+        if (messageBytes) {
+          try {
+            const messageFields = ProtobufDecoder.decodeMessage(messageBytes);
+            text = ProtobufDecoder.getString(messageFields, this.FIELD_CONTENT);
+            
+            // Get thinking from nested message
+            const thinkingBytes = ProtobufDecoder.getBytes(messageFields, this.FIELD_THINKING);
+            if (thinkingBytes) {
+              const thinkingFields = ProtobufDecoder.decodeMessage(thinkingBytes);
+              thinking = ProtobufDecoder.getString(thinkingFields, 1);
+            }
+          } catch (e) {}
+        }
+      }
+      
+      return { text, thinking };
+    } catch (e) {
+      return { text: null, thinking: null };
+    }
+  }
+}
+
 // Protobuf encoder helper
 class ProtobufEncoder {
   static encodeVarint(value) {
@@ -301,13 +499,17 @@ class BidiCursorClient extends EventEmitter {
 
   /**
    * Encode tool-specific result
+   * Note: toolExecutor returns { success, data, error }, extract data for encoding
    */
   encodeToolSpecificResult(tool, result) {
+    // Extract actual data from result object
+    const data = result.data || result;
+    
     switch (tool) {
       case ClientSideToolV2.LIST_DIR: {
         // ListDirResult: repeated File files = 1
         let msg = Buffer.alloc(0);
-        const files = result.files || [];
+        const files = data.files || [];
         for (const file of files) {
           // File message: string name = 1, bool is_dir = 2
           let fileMsg = Buffer.alloc(0);
@@ -322,15 +524,16 @@ class BidiCursorClient extends EventEmitter {
       
       case ClientSideToolV2.READ_FILE: {
         // ReadFileResult: string content = 1
-        return ProtobufEncoder.encodeField(1, 2, result.content || '');
+        return ProtobufEncoder.encodeField(1, 2, data.content || '');
       }
       
       case ClientSideToolV2.RUN_TERMINAL_COMMAND_V2: {
         // RunTerminalCommandV2Result: string output = 1, int32 exit_code = 2
         let msg = Buffer.alloc(0);
-        const output = (result.stdout || '') + (result.stderr || '');
+        // toolExecutor returns { output, exit_code } or { stdout, stderr, exit_code }
+        const output = data.output || ((data.stdout || '') + (data.stderr || ''));
         msg = Buffer.concat([msg, ProtobufEncoder.encodeField(1, 2, output)]);
-        msg = Buffer.concat([msg, ProtobufEncoder.encodeField(2, 0, result.exit_code || 0)]);
+        msg = Buffer.concat([msg, ProtobufEncoder.encodeField(2, 0, data.exit_code || 0)]);
         return msg;
       }
       
@@ -338,19 +541,16 @@ class BidiCursorClient extends EventEmitter {
         // EditFileResult: bool success = 1, string message = 2
         let msg = Buffer.alloc(0);
         msg = Buffer.concat([msg, ProtobufEncoder.encodeField(1, 0, result.success ? 1 : 0)]);
-        if (result.message) {
-          msg = Buffer.concat([msg, ProtobufEncoder.encodeField(2, 2, result.message)]);
+        if (data.message) {
+          msg = Buffer.concat([msg, ProtobufEncoder.encodeField(2, 2, data.message)]);
         }
         return msg;
       }
       
       case ClientSideToolV2.RIPGREP_SEARCH: {
         // RipgrepSearchResult with nested structure
-        // Simplified: just return matches as JSON for now
         let msg = Buffer.alloc(0);
-        const matches = result.matches || [];
-        // Field 1: internal (ISearchCompleteStats), Field 2: results (FileMatch array)
-        // For simplicity, encode as raw text
+        const matches = data.matches || [];
         msg = Buffer.concat([msg, ProtobufEncoder.encodeField(1, 2, JSON.stringify({ results: matches }))]);
         return msg;
       }
@@ -359,7 +559,7 @@ class BidiCursorClient extends EventEmitter {
       case ClientSideToolV2.GLOB_FILE_SEARCH: {
         // ToolCallFileSearchResult: repeated FileSearchMatch results = 1
         let msg = Buffer.alloc(0);
-        const files = result.files || result.results || [];
+        const files = data.files || data.results || [];
         for (const file of files) {
           // FileSearchMatch: string uri = 1
           const matchMsg = ProtobufEncoder.encodeField(1, 2, file.uri || file);
@@ -375,7 +575,7 @@ class BidiCursorClient extends EventEmitter {
       
       default:
         // Generic: encode as JSON string
-        return ProtobufEncoder.encodeField(1, 2, JSON.stringify(result));
+        return ProtobufEncoder.encodeField(1, 2, JSON.stringify(data));
     }
   }
 
@@ -470,6 +670,7 @@ class BidiCursorClient extends EventEmitter {
       verbose = false,
       supportedTools = DEFAULT_AGENT_TOOLS,
       timeout = 60000,
+      onContent = null,  // Callback for streaming content
     } = options;
 
     // Connect
@@ -521,6 +722,7 @@ class BidiCursorClient extends EventEmitter {
       stream.on('data', async (chunk) => {
         lastActivity = Date.now();
         buffer = Buffer.concat([buffer, chunk]);
+        if (verbose) console.log(`[Received ${chunk.length} bytes, buffer: ${buffer.length}]`);
         
         // Parse frames
         const { frames, remaining } = this.parseFrames(buffer);
@@ -537,68 +739,81 @@ class BidiCursorClient extends EventEmitter {
             }
           }
           
-          // Try to decode response
-          try {
-            const response = $root.StreamUnifiedChatWithToolsResponse.decode(data);
-            
-            // Extract text content
-            const content = response?.message?.content;
-            if (content) {
-              fullResponse += content;
-              process.stdout.write(content);
-            }
-            
-            // Extract thinking
-            const thinking = response?.message?.thinking?.content;
-            if (thinking && verbose) {
-              console.log(`<thinking>${thinking}</thinking>`);
-            }
-          } catch (e) {
-            // Try to extract text directly
-            const text = data.toString('utf-8');
-            const printable = text.replace(/[^\x20-\x7E\n\r\t]/g, '');
-            if (printable.length > 2) {
-              fullResponse += printable;
-              process.stdout.write(printable);
+          // Use proper protobuf decoding - ported from cursor_chat_proto.py
+          // See TASK-7-protobuf-schemas.md for schema
+          
+          // 1. Check for tool calls using ToolCallDecoder
+          const toolCalls = ToolCallDecoder.findToolCalls(data);
+          for (const tc of toolCalls) {
+            if (!toolCallsSeen.has(tc.toolCallId)) {
+              toolCallsSeen.add(tc.toolCallId);
+              
+              if (toolCallsExecuted < maxToolCalls) {
+                toolCallsExecuted++;
+                
+                // Parse params from rawArgs
+                let params = {};
+                try {
+                  if (tc.rawArgs) params = JSON.parse(tc.rawArgs);
+                } catch (e) {}
+                
+                const toolCall = {
+                  tool: tc.tool,
+                  toolCallId: tc.toolCallId,
+                  name: tc.name,
+                  params,
+                };
+                
+                if (verbose) {
+                  console.log(`\n[Tool: ${tc.name} (enum=${tc.tool})]`);
+                  console.log(`[Params: ${JSON.stringify(params)}]`);
+                }
+                
+                // Execute tool
+                const result = await this.toolExecutor.execute(toolCall);
+                
+                if (verbose) {
+                  console.log(`[Result: ${result.success ? 'success' : result.error}]`);
+                  if (result.data) {
+                    console.log(`[Output: ${JSON.stringify(result.data).substring(0, 200)}]`);
+                  }
+                }
+                
+                // Send result back
+                const resultData = this.encodeToolResultMessage(tc.tool, tc.toolCallId, result);
+                const framedResult = this.frameMessage(resultData);
+                await new Promise(r => setTimeout(r, 200));
+                stream.write(framedResult);
+                
+                if (verbose) {
+                  console.log(`[Sent tool result (${framedResult.length} bytes)]`);
+                }
+              }
             }
           }
           
-          // Check for tool calls
-          const toolCall = this.parseToolCall(data);
-          if (toolCall && !toolCallsSeen.has(toolCall.toolCallId)) {
-            toolCallsSeen.add(toolCall.toolCallId);
+          // 2. Extract text content using ResponseDecoder
+          // Skip if this chunk contained tool calls (to avoid extracting garbage)
+          if (toolCalls.length === 0) {
+            const response = ResponseDecoder.decode(data);
             
-            if (toolCallsExecuted < maxToolCalls) {
-              toolCallsExecuted++;
-              
-              if (verbose) {
-                console.log(`\n[Tool: ${toolCall.name}]`);
-                console.log(`[Params: ${JSON.stringify(toolCall.params)}]`);
-              }
-              
-              // Execute tool
-              const result = await this.toolExecutor.execute(toolCall);
-              
-              if (verbose) {
-                console.log(`[Result: ${result.success ? 'success' : result.error}]`);
-              }
-              
-              // Send result back on the same stream
-              const resultData = this.encodeToolResultMessage(
-                toolCall.tool, 
-                toolCall.toolCallId,
-                result
-              );
-              const framedResult = this.frameMessage(resultData);
-              
-              // Small delay for server to finish sending tool call
-              await new Promise(r => setTimeout(r, 200));
-              
-              stream.write(framedResult);
-              
-              if (verbose) {
-                console.log(`[Sent tool result (${framedResult.length} bytes)]`);
-              }
+            if (response.text) {
+              fullResponse += response.text;
+              if (verbose) process.stdout.write(response.text);
+              if (onContent) onContent(response.text);
+            }
+            
+            if (response.thinking && verbose) {
+              console.log(`<thinking>${response.thinking}</thinking>`);
+            }
+            
+            // Debug: show fields if no text found
+            if (verbose && !response.text && data.length > 20) {
+              try {
+                const fields = ProtobufDecoder.decodeMessage(data);
+                const fieldNums = Object.keys(fields).join(',');
+                console.log(`[No text, fields: ${fieldNums}, size: ${data.length}]`);
+              } catch (e) {}
             }
           }
         }

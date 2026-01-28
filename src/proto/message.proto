@@ -135,40 +135,40 @@ message StreamUnifiedChatWithToolsRequest {
   Request request = 1;
 }
 
+// StreamUnifiedChatResponse - see TASK-7-protobuf-schemas.md
+// Main response message from StreamUnifiedChatWithTools
 message StreamUnifiedChatWithToolsResponse {
-  message Message {
-    message WebTool {
-      message WebPage {
-        string url = 1;
-        string title = 2;
-        string content = 3;
-      }
-      repeated WebPage webPage = 1;
-    }
-    message Unknown12 {
-      message Content {
-        string content = 1;
-      }
-      Content content = 1;
-    }
+  // Main text content - field 1
+  string text = 1;
+  
+  // Server bubble ID
+  string server_bubble_id = 22;
+  
+  // Debugging fields
+  string debugging_only_chat_prompt = 2;
+  int32 debugging_only_token_count = 3;
+  
+  // Thinking/reasoning - field 25
+  message Thinking {
     string content = 1;
-    WebTool webtool = 11;
-    Unknown12 unknown12 = 12;
-    string unknown22 = 22; // uuid
-    string unknown23 = 23;
-    string unknown27 = 27; // uuid
-    MessageThinking thinking = 25;
   }
-
-  // Tool call from server - see TASK-26-tool-schemas.md
-  message ToolCall {
+  Thinking thinking = 25;
+  
+  // Tool calls - see TASK-26-tool-schemas.md
+  // tool_call_v2 at field 36
+  message ToolCallV2 {
     ClientSideToolV2 tool = 1;
     string tool_call_id = 3;
     string name = 9;
     string raw_args = 10;
   }
-
-  Message message = 2;
-  MessageSummary summary = 3;
-  ToolCall toolCall = 4; // Tool call request from server
+  ToolCallV2 tool_call_v2 = 36;
+  
+  // Legacy tool call at field 13
+  message ToolCallV1 {
+    string tool_call_id = 1;
+    string name = 2;
+    string arguments = 3;
+  }
+  ToolCallV1 tool_call = 13;
 }

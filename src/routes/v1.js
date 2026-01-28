@@ -115,38 +115,90 @@ router.post('/chat/completions', async (req, res) => {
 
     // Use bidirectional client for agent mode (required for tool calling)
     if (agentMode) {
-      console.log('Agent mode: using bidirectional HTTP/2 client');
+      console.log('Agent mode: using bidirectional HTTP/2 client, stream=' + stream);
       
       const bidiClient = new BidiCursorClient(process.cwd());
       const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+      const responseId = `chatcmpl-${uuidv4()}`;
       
-      try {
-        const response = await bidiClient.runAgent(authToken, prompt, model, {
-          maxToolCalls: 10,
-          verbose: true,
-          timeout: 60000,
-        });
+      if (stream) {
+        // Streaming response for agent mode
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
         
-        // Return OpenAI-compatible response
-        return res.json({
-          id: `chatcmpl-${uuidv4()}`,
-          object: 'chat.completion',
-          created: Math.floor(Date.now() / 1000),
-          model: model,
-          choices: [{
-            index: 0,
-            message: {
-              role: 'assistant',
-              content: response,
+        try {
+          const response = await bidiClient.runAgent(authToken, prompt, model, {
+            maxToolCalls: 10,
+            verbose: true,
+            timeout: 60000,
+            // Callback to stream content as it arrives
+            onContent: (content) => {
+              res.write(`data: ${JSON.stringify({
+                id: responseId,
+                object: 'chat.completion.chunk',
+                created: Math.floor(Date.now() / 1000),
+                model: model,
+                choices: [{
+                  index: 0,
+                  delta: { content },
+                  finish_reason: null,
+                }],
+              })}\n\n`);
             },
-            finish_reason: 'stop',
-          }],
-          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-        });
-      } catch (err) {
-        console.error('Bidi client error:', err);
-        return res.status(500).json({ error: err.message });
+          });
+          
+          // Send final chunk
+          res.write(`data: ${JSON.stringify({
+            id: responseId,
+            object: 'chat.completion.chunk',
+            created: Math.floor(Date.now() / 1000),
+            model: model,
+            choices: [{
+              index: 0,
+              delta: {},
+              finish_reason: 'stop',
+            }],
+          })}\n\n`);
+          res.write('data: [DONE]\n\n');
+          res.end();
+        } catch (err) {
+          console.error('Bidi client error:', err);
+          res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+          res.end();
+        }
+      } else {
+        // Non-streaming response for agent mode
+        try {
+          const response = await bidiClient.runAgent(authToken, prompt, model, {
+            maxToolCalls: 10,
+            verbose: true,
+            timeout: 60000,
+          });
+          
+          console.log(`Agent response (${response?.length || 0} chars): "${response?.substring(0, 100)}..."`);
+          
+          return res.json({
+            id: responseId,
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: model,
+            choices: [{
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: response,
+              },
+              finish_reason: 'stop',
+            }],
+            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+          });
+        } catch (err) {
+          console.error('Bidi client error:', err);
+          return res.status(500).json({ error: err.message });
+        }
       }
+      return;
     }
 
     // Non-agent mode: use regular unidirectional streaming

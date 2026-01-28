@@ -5196,9 +5196,13 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
      * Properties of a StreamUnifiedChatWithToolsResponse.
      * @exports IStreamUnifiedChatWithToolsResponse
      * @interface IStreamUnifiedChatWithToolsResponse
-     * @property {StreamUnifiedChatWithToolsResponse.IMessage|null} [message] StreamUnifiedChatWithToolsResponse message
-     * @property {IMessageSummary|null} [summary] StreamUnifiedChatWithToolsResponse summary
-     * @property {StreamUnifiedChatWithToolsResponse.IToolCall|null} [toolCall] StreamUnifiedChatWithToolsResponse toolCall
+     * @property {string|null} [text] StreamUnifiedChatWithToolsResponse text
+     * @property {string|null} [serverBubbleId] StreamUnifiedChatWithToolsResponse serverBubbleId
+     * @property {string|null} [debuggingOnlyChatPrompt] StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt
+     * @property {number|null} [debuggingOnlyTokenCount] StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount
+     * @property {StreamUnifiedChatWithToolsResponse.IThinking|null} [thinking] StreamUnifiedChatWithToolsResponse thinking
+     * @property {StreamUnifiedChatWithToolsResponse.IToolCallV2|null} [toolCallV2] StreamUnifiedChatWithToolsResponse toolCallV2
+     * @property {StreamUnifiedChatWithToolsResponse.IToolCallV1|null} [toolCall] StreamUnifiedChatWithToolsResponse toolCall
      */
 
     /**
@@ -5217,24 +5221,56 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     }
 
     /**
-     * StreamUnifiedChatWithToolsResponse message.
-     * @member {StreamUnifiedChatWithToolsResponse.IMessage|null|undefined} message
+     * StreamUnifiedChatWithToolsResponse text.
+     * @member {string} text
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
-    StreamUnifiedChatWithToolsResponse.prototype.message = null;
+    StreamUnifiedChatWithToolsResponse.prototype.text = "";
 
     /**
-     * StreamUnifiedChatWithToolsResponse summary.
-     * @member {IMessageSummary|null|undefined} summary
+     * StreamUnifiedChatWithToolsResponse serverBubbleId.
+     * @member {string} serverBubbleId
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
-    StreamUnifiedChatWithToolsResponse.prototype.summary = null;
+    StreamUnifiedChatWithToolsResponse.prototype.serverBubbleId = "";
+
+    /**
+     * StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt.
+     * @member {string} debuggingOnlyChatPrompt
+     * @memberof StreamUnifiedChatWithToolsResponse
+     * @instance
+     */
+    StreamUnifiedChatWithToolsResponse.prototype.debuggingOnlyChatPrompt = "";
+
+    /**
+     * StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount.
+     * @member {number} debuggingOnlyTokenCount
+     * @memberof StreamUnifiedChatWithToolsResponse
+     * @instance
+     */
+    StreamUnifiedChatWithToolsResponse.prototype.debuggingOnlyTokenCount = 0;
+
+    /**
+     * StreamUnifiedChatWithToolsResponse thinking.
+     * @member {StreamUnifiedChatWithToolsResponse.IThinking|null|undefined} thinking
+     * @memberof StreamUnifiedChatWithToolsResponse
+     * @instance
+     */
+    StreamUnifiedChatWithToolsResponse.prototype.thinking = null;
+
+    /**
+     * StreamUnifiedChatWithToolsResponse toolCallV2.
+     * @member {StreamUnifiedChatWithToolsResponse.IToolCallV2|null|undefined} toolCallV2
+     * @memberof StreamUnifiedChatWithToolsResponse
+     * @instance
+     */
+    StreamUnifiedChatWithToolsResponse.prototype.toolCallV2 = null;
 
     /**
      * StreamUnifiedChatWithToolsResponse toolCall.
-     * @member {StreamUnifiedChatWithToolsResponse.IToolCall|null|undefined} toolCall
+     * @member {StreamUnifiedChatWithToolsResponse.IToolCallV1|null|undefined} toolCall
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
@@ -5264,12 +5300,20 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.encode = function encode(message, writer) {
         if (!writer)
             writer = $Writer.create();
-        if (message.message != null && Object.hasOwnProperty.call(message, "message"))
-            $root.StreamUnifiedChatWithToolsResponse.Message.encode(message.message, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
-        if (message.summary != null && Object.hasOwnProperty.call(message, "summary"))
-            $root.MessageSummary.encode(message.summary, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+        if (message.text != null && Object.hasOwnProperty.call(message, "text"))
+            writer.uint32(/* id 1, wireType 2 =*/10).string(message.text);
+        if (message.debuggingOnlyChatPrompt != null && Object.hasOwnProperty.call(message, "debuggingOnlyChatPrompt"))
+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.debuggingOnlyChatPrompt);
+        if (message.debuggingOnlyTokenCount != null && Object.hasOwnProperty.call(message, "debuggingOnlyTokenCount"))
+            writer.uint32(/* id 3, wireType 0 =*/24).int32(message.debuggingOnlyTokenCount);
         if (message.toolCall != null && Object.hasOwnProperty.call(message, "toolCall"))
-            $root.StreamUnifiedChatWithToolsResponse.ToolCall.encode(message.toolCall, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.encode(message.toolCall, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
+        if (message.serverBubbleId != null && Object.hasOwnProperty.call(message, "serverBubbleId"))
+            writer.uint32(/* id 22, wireType 2 =*/178).string(message.serverBubbleId);
+        if (message.thinking != null && Object.hasOwnProperty.call(message, "thinking"))
+            $root.StreamUnifiedChatWithToolsResponse.Thinking.encode(message.thinking, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
+        if (message.toolCallV2 != null && Object.hasOwnProperty.call(message, "toolCallV2"))
+            $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.encode(message.toolCallV2, writer.uint32(/* id 36, wireType 2 =*/290).fork()).ldelim();
         return writer;
     };
 
@@ -5304,16 +5348,32 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
+            case 1: {
+                    message.text = reader.string();
+                    break;
+                }
+            case 22: {
+                    message.serverBubbleId = reader.string();
+                    break;
+                }
             case 2: {
-                    message.message = $root.StreamUnifiedChatWithToolsResponse.Message.decode(reader, reader.uint32());
+                    message.debuggingOnlyChatPrompt = reader.string();
                     break;
                 }
             case 3: {
-                    message.summary = $root.MessageSummary.decode(reader, reader.uint32());
+                    message.debuggingOnlyTokenCount = reader.int32();
                     break;
                 }
-            case 4: {
-                    message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.decode(reader, reader.uint32());
+            case 25: {
+                    message.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.decode(reader, reader.uint32());
+                    break;
+                }
+            case 36: {
+                    message.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.decode(reader, reader.uint32());
+                    break;
+                }
+            case 13: {
+                    message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.decode(reader, reader.uint32());
                     break;
                 }
             default:
@@ -5351,18 +5411,30 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.verify = function verify(message) {
         if (typeof message !== "object" || message === null)
             return "object expected";
-        if (message.message != null && message.hasOwnProperty("message")) {
-            var error = $root.StreamUnifiedChatWithToolsResponse.Message.verify(message.message);
+        if (message.text != null && message.hasOwnProperty("text"))
+            if (!$util.isString(message.text))
+                return "text: string expected";
+        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId"))
+            if (!$util.isString(message.serverBubbleId))
+                return "serverBubbleId: string expected";
+        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
+            if (!$util.isString(message.debuggingOnlyChatPrompt))
+                return "debuggingOnlyChatPrompt: string expected";
+        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
+            if (!$util.isInteger(message.debuggingOnlyTokenCount))
+                return "debuggingOnlyTokenCount: integer expected";
+        if (message.thinking != null && message.hasOwnProperty("thinking")) {
+            var error = $root.StreamUnifiedChatWithToolsResponse.Thinking.verify(message.thinking);
             if (error)
-                return "message." + error;
+                return "thinking." + error;
         }
-        if (message.summary != null && message.hasOwnProperty("summary")) {
-            var error = $root.MessageSummary.verify(message.summary);
+        if (message.toolCallV2 != null && message.hasOwnProperty("toolCallV2")) {
+            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.verify(message.toolCallV2);
             if (error)
-                return "summary." + error;
+                return "toolCallV2." + error;
         }
         if (message.toolCall != null && message.hasOwnProperty("toolCall")) {
-            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCall.verify(message.toolCall);
+            var error = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.verify(message.toolCall);
             if (error)
                 return "toolCall." + error;
         }
@@ -5381,20 +5453,28 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         if (object instanceof $root.StreamUnifiedChatWithToolsResponse)
             return object;
         var message = new $root.StreamUnifiedChatWithToolsResponse();
-        if (object.message != null) {
-            if (typeof object.message !== "object")
-                throw TypeError(".StreamUnifiedChatWithToolsResponse.message: object expected");
-            message.message = $root.StreamUnifiedChatWithToolsResponse.Message.fromObject(object.message);
+        if (object.text != null)
+            message.text = String(object.text);
+        if (object.serverBubbleId != null)
+            message.serverBubbleId = String(object.serverBubbleId);
+        if (object.debuggingOnlyChatPrompt != null)
+            message.debuggingOnlyChatPrompt = String(object.debuggingOnlyChatPrompt);
+        if (object.debuggingOnlyTokenCount != null)
+            message.debuggingOnlyTokenCount = object.debuggingOnlyTokenCount | 0;
+        if (object.thinking != null) {
+            if (typeof object.thinking !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.thinking: object expected");
+            message.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.fromObject(object.thinking);
         }
-        if (object.summary != null) {
-            if (typeof object.summary !== "object")
-                throw TypeError(".StreamUnifiedChatWithToolsResponse.summary: object expected");
-            message.summary = $root.MessageSummary.fromObject(object.summary);
+        if (object.toolCallV2 != null) {
+            if (typeof object.toolCallV2 !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.toolCallV2: object expected");
+            message.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.fromObject(object.toolCallV2);
         }
         if (object.toolCall != null) {
             if (typeof object.toolCall !== "object")
                 throw TypeError(".StreamUnifiedChatWithToolsResponse.toolCall: object expected");
-            message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.fromObject(object.toolCall);
+            message.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.fromObject(object.toolCall);
         }
         return message;
     };
@@ -5413,16 +5493,28 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             options = {};
         var object = {};
         if (options.defaults) {
-            object.message = null;
-            object.summary = null;
+            object.text = "";
+            object.debuggingOnlyChatPrompt = "";
+            object.debuggingOnlyTokenCount = 0;
             object.toolCall = null;
+            object.serverBubbleId = "";
+            object.thinking = null;
+            object.toolCallV2 = null;
         }
-        if (message.message != null && message.hasOwnProperty("message"))
-            object.message = $root.StreamUnifiedChatWithToolsResponse.Message.toObject(message.message, options);
-        if (message.summary != null && message.hasOwnProperty("summary"))
-            object.summary = $root.MessageSummary.toObject(message.summary, options);
+        if (message.text != null && message.hasOwnProperty("text"))
+            object.text = message.text;
+        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
+            object.debuggingOnlyChatPrompt = message.debuggingOnlyChatPrompt;
+        if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
+            object.debuggingOnlyTokenCount = message.debuggingOnlyTokenCount;
         if (message.toolCall != null && message.hasOwnProperty("toolCall"))
-            object.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCall.toObject(message.toolCall, options);
+            object.toolCall = $root.StreamUnifiedChatWithToolsResponse.ToolCallV1.toObject(message.toolCall, options);
+        if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId"))
+            object.serverBubbleId = message.serverBubbleId;
+        if (message.thinking != null && message.hasOwnProperty("thinking"))
+            object.thinking = $root.StreamUnifiedChatWithToolsResponse.Thinking.toObject(message.thinking, options);
+        if (message.toolCallV2 != null && message.hasOwnProperty("toolCallV2"))
+            object.toolCallV2 = $root.StreamUnifiedChatWithToolsResponse.ToolCallV2.toObject(message.toolCallV2, options);
         return object;
     };
 
@@ -5452,30 +5544,24 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse";
     };
 
-    StreamUnifiedChatWithToolsResponse.Message = (function() {
+    StreamUnifiedChatWithToolsResponse.Thinking = (function() {
 
         /**
-         * Properties of a Message.
+         * Properties of a Thinking.
          * @memberof StreamUnifiedChatWithToolsResponse
-         * @interface IMessage
-         * @property {string|null} [content] Message content
-         * @property {StreamUnifiedChatWithToolsResponse.Message.IWebTool|null} [webtool] Message webtool
-         * @property {StreamUnifiedChatWithToolsResponse.Message.IUnknown12|null} [unknown12] Message unknown12
-         * @property {string|null} [unknown22] Message unknown22
-         * @property {string|null} [unknown23] Message unknown23
-         * @property {string|null} [unknown27] Message unknown27
-         * @property {IMessageThinking|null} [thinking] Message thinking
+         * @interface IThinking
+         * @property {string|null} [content] Thinking content
          */
 
         /**
-         * Constructs a new Message.
+         * Constructs a new Thinking.
          * @memberof StreamUnifiedChatWithToolsResponse
-         * @classdesc Represents a Message.
-         * @implements IMessage
+         * @classdesc Represents a Thinking.
+         * @implements IThinking
          * @constructor
-         * @param {StreamUnifiedChatWithToolsResponse.IMessage=} [properties] Properties to set
+         * @param {StreamUnifiedChatWithToolsResponse.IThinking=} [properties] Properties to set
          */
-        function Message(properties) {
+        function Thinking(properties) {
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -5483,159 +5569,75 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         }
 
         /**
-         * Message content.
+         * Thinking content.
          * @member {string} content
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @instance
          */
-        Message.prototype.content = "";
+        Thinking.prototype.content = "";
 
         /**
-         * Message webtool.
-         * @member {StreamUnifiedChatWithToolsResponse.Message.IWebTool|null|undefined} webtool
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.webtool = null;
-
-        /**
-         * Message unknown12.
-         * @member {StreamUnifiedChatWithToolsResponse.Message.IUnknown12|null|undefined} unknown12
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.unknown12 = null;
-
-        /**
-         * Message unknown22.
-         * @member {string} unknown22
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.unknown22 = "";
-
-        /**
-         * Message unknown23.
-         * @member {string} unknown23
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.unknown23 = "";
-
-        /**
-         * Message unknown27.
-         * @member {string} unknown27
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.unknown27 = "";
-
-        /**
-         * Message thinking.
-         * @member {IMessageThinking|null|undefined} thinking
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
-         * @instance
-         */
-        Message.prototype.thinking = null;
-
-        /**
-         * Creates a new Message instance using the specified properties.
+         * Creates a new Thinking instance using the specified properties.
          * @function create
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IMessage=} [properties] Properties to set
-         * @returns {StreamUnifiedChatWithToolsResponse.Message} Message instance
+         * @param {StreamUnifiedChatWithToolsResponse.IThinking=} [properties] Properties to set
+         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking instance
          */
-        Message.create = function create(properties) {
-            return new Message(properties);
+        Thinking.create = function create(properties) {
+            return new Thinking(properties);
         };
 
         /**
-         * Encodes the specified Message message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.verify|verify} messages.
+         * Encodes the specified Thinking message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Thinking.verify|verify} messages.
          * @function encode
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IMessage} message Message message or plain object to encode
+         * @param {StreamUnifiedChatWithToolsResponse.IThinking} message Thinking message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        Message.encode = function encode(message, writer) {
+        Thinking.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
             if (message.content != null && Object.hasOwnProperty.call(message, "content"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.content);
-            if (message.webtool != null && Object.hasOwnProperty.call(message, "webtool"))
-                $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.encode(message.webtool, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
-            if (message.unknown12 != null && Object.hasOwnProperty.call(message, "unknown12"))
-                $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.encode(message.unknown12, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
-            if (message.unknown22 != null && Object.hasOwnProperty.call(message, "unknown22"))
-                writer.uint32(/* id 22, wireType 2 =*/178).string(message.unknown22);
-            if (message.unknown23 != null && Object.hasOwnProperty.call(message, "unknown23"))
-                writer.uint32(/* id 23, wireType 2 =*/186).string(message.unknown23);
-            if (message.thinking != null && Object.hasOwnProperty.call(message, "thinking"))
-                $root.MessageThinking.encode(message.thinking, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
-            if (message.unknown27 != null && Object.hasOwnProperty.call(message, "unknown27"))
-                writer.uint32(/* id 27, wireType 2 =*/218).string(message.unknown27);
             return writer;
         };
 
         /**
-         * Encodes the specified Message message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.verify|verify} messages.
+         * Encodes the specified Thinking message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Thinking.verify|verify} messages.
          * @function encodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IMessage} message Message message or plain object to encode
+         * @param {StreamUnifiedChatWithToolsResponse.IThinking} message Thinking message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        Message.encodeDelimited = function encodeDelimited(message, writer) {
+        Thinking.encodeDelimited = function encodeDelimited(message, writer) {
             return this.encode(message, writer).ldelim();
         };
 
         /**
-         * Decodes a Message message from the specified reader or buffer.
+         * Decodes a Thinking message from the specified reader or buffer.
          * @function decode
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
          * @param {number} [length] Message length if known beforehand
-         * @returns {StreamUnifiedChatWithToolsResponse.Message} Message
+         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        Message.decode = function decode(reader, length) {
+        Thinking.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Message();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Thinking();
             while (reader.pos < end) {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.content = reader.string();
-                        break;
-                    }
-                case 11: {
-                        message.webtool = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.decode(reader, reader.uint32());
-                        break;
-                    }
-                case 12: {
-                        message.unknown12 = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.decode(reader, reader.uint32());
-                        break;
-                    }
-                case 22: {
-                        message.unknown22 = reader.string();
-                        break;
-                    }
-                case 23: {
-                        message.unknown23 = reader.string();
-                        break;
-                    }
-                case 27: {
-                        message.unknown27 = reader.string();
-                        break;
-                    }
-                case 25: {
-                        message.thinking = $root.MessageThinking.decode(reader, reader.uint32());
                         break;
                     }
                 default:
@@ -5647,1074 +5649,125 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Decodes a Message message from the specified reader or buffer, length delimited.
+         * Decodes a Thinking message from the specified reader or buffer, length delimited.
          * @function decodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {StreamUnifiedChatWithToolsResponse.Message} Message
+         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        Message.decodeDelimited = function decodeDelimited(reader) {
+        Thinking.decodeDelimited = function decodeDelimited(reader) {
             if (!(reader instanceof $Reader))
                 reader = new $Reader(reader);
             return this.decode(reader, reader.uint32());
         };
 
         /**
-         * Verifies a Message message.
+         * Verifies a Thinking message.
          * @function verify
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
          * @param {Object.<string,*>} message Plain object to verify
          * @returns {string|null} `null` if valid, otherwise the reason why it is not
          */
-        Message.verify = function verify(message) {
+        Thinking.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.content != null && message.hasOwnProperty("content"))
                 if (!$util.isString(message.content))
                     return "content: string expected";
-            if (message.webtool != null && message.hasOwnProperty("webtool")) {
-                var error = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.verify(message.webtool);
-                if (error)
-                    return "webtool." + error;
-            }
-            if (message.unknown12 != null && message.hasOwnProperty("unknown12")) {
-                var error = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.verify(message.unknown12);
-                if (error)
-                    return "unknown12." + error;
-            }
-            if (message.unknown22 != null && message.hasOwnProperty("unknown22"))
-                if (!$util.isString(message.unknown22))
-                    return "unknown22: string expected";
-            if (message.unknown23 != null && message.hasOwnProperty("unknown23"))
-                if (!$util.isString(message.unknown23))
-                    return "unknown23: string expected";
-            if (message.unknown27 != null && message.hasOwnProperty("unknown27"))
-                if (!$util.isString(message.unknown27))
-                    return "unknown27: string expected";
-            if (message.thinking != null && message.hasOwnProperty("thinking")) {
-                var error = $root.MessageThinking.verify(message.thinking);
-                if (error)
-                    return "thinking." + error;
-            }
             return null;
         };
 
         /**
-         * Creates a Message message from a plain object. Also converts values to their respective internal types.
+         * Creates a Thinking message from a plain object. Also converts values to their respective internal types.
          * @function fromObject
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
          * @param {Object.<string,*>} object Plain object
-         * @returns {StreamUnifiedChatWithToolsResponse.Message} Message
+         * @returns {StreamUnifiedChatWithToolsResponse.Thinking} Thinking
          */
-        Message.fromObject = function fromObject(object) {
-            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Message)
+        Thinking.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Thinking)
                 return object;
-            var message = new $root.StreamUnifiedChatWithToolsResponse.Message();
+            var message = new $root.StreamUnifiedChatWithToolsResponse.Thinking();
             if (object.content != null)
                 message.content = String(object.content);
-            if (object.webtool != null) {
-                if (typeof object.webtool !== "object")
-                    throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.webtool: object expected");
-                message.webtool = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.fromObject(object.webtool);
-            }
-            if (object.unknown12 != null) {
-                if (typeof object.unknown12 !== "object")
-                    throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.unknown12: object expected");
-                message.unknown12 = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.fromObject(object.unknown12);
-            }
-            if (object.unknown22 != null)
-                message.unknown22 = String(object.unknown22);
-            if (object.unknown23 != null)
-                message.unknown23 = String(object.unknown23);
-            if (object.unknown27 != null)
-                message.unknown27 = String(object.unknown27);
-            if (object.thinking != null) {
-                if (typeof object.thinking !== "object")
-                    throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.thinking: object expected");
-                message.thinking = $root.MessageThinking.fromObject(object.thinking);
-            }
             return message;
         };
 
         /**
-         * Creates a plain object from a Message message. Also converts values to other types if specified.
+         * Creates a plain object from a Thinking message. Also converts values to other types if specified.
          * @function toObject
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.Message} message Message
+         * @param {StreamUnifiedChatWithToolsResponse.Thinking} message Thinking
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        Message.toObject = function toObject(message, options) {
+        Thinking.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
             var object = {};
-            if (options.defaults) {
+            if (options.defaults)
                 object.content = "";
-                object.webtool = null;
-                object.unknown12 = null;
-                object.unknown22 = "";
-                object.unknown23 = "";
-                object.thinking = null;
-                object.unknown27 = "";
-            }
             if (message.content != null && message.hasOwnProperty("content"))
                 object.content = message.content;
-            if (message.webtool != null && message.hasOwnProperty("webtool"))
-                object.webtool = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.toObject(message.webtool, options);
-            if (message.unknown12 != null && message.hasOwnProperty("unknown12"))
-                object.unknown12 = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.toObject(message.unknown12, options);
-            if (message.unknown22 != null && message.hasOwnProperty("unknown22"))
-                object.unknown22 = message.unknown22;
-            if (message.unknown23 != null && message.hasOwnProperty("unknown23"))
-                object.unknown23 = message.unknown23;
-            if (message.thinking != null && message.hasOwnProperty("thinking"))
-                object.thinking = $root.MessageThinking.toObject(message.thinking, options);
-            if (message.unknown27 != null && message.hasOwnProperty("unknown27"))
-                object.unknown27 = message.unknown27;
             return object;
         };
 
         /**
-         * Converts this Message to JSON.
+         * Converts this Thinking to JSON.
          * @function toJSON
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @instance
          * @returns {Object.<string,*>} JSON object
          */
-        Message.prototype.toJSON = function toJSON() {
+        Thinking.prototype.toJSON = function toJSON() {
             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
         };
 
         /**
-         * Gets the default type url for Message
+         * Gets the default type url for Thinking
          * @function getTypeUrl
-         * @memberof StreamUnifiedChatWithToolsResponse.Message
+         * @memberof StreamUnifiedChatWithToolsResponse.Thinking
          * @static
          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns {string} The default type url
          */
-        Message.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        Thinking.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
             if (typeUrlPrefix === undefined) {
                 typeUrlPrefix = "type.googleapis.com";
             }
-            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Message";
+            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Thinking";
         };
 
-        Message.WebTool = (function() {
-
-            /**
-             * Properties of a WebTool.
-             * @memberof StreamUnifiedChatWithToolsResponse.Message
-             * @interface IWebTool
-             * @property {Array.<StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage>|null} [webPage] WebTool webPage
-             */
-
-            /**
-             * Constructs a new WebTool.
-             * @memberof StreamUnifiedChatWithToolsResponse.Message
-             * @classdesc Represents a WebTool.
-             * @implements IWebTool
-             * @constructor
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IWebTool=} [properties] Properties to set
-             */
-            function WebTool(properties) {
-                this.webPage = [];
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-
-            /**
-             * WebTool webPage.
-             * @member {Array.<StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage>} webPage
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @instance
-             */
-            WebTool.prototype.webPage = $util.emptyArray;
-
-            /**
-             * Creates a new WebTool instance using the specified properties.
-             * @function create
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IWebTool=} [properties] Properties to set
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool} WebTool instance
-             */
-            WebTool.create = function create(properties) {
-                return new WebTool(properties);
-            };
-
-            /**
-             * Encodes the specified WebTool message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.WebTool.verify|verify} messages.
-             * @function encode
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IWebTool} message WebTool message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            WebTool.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.webPage != null && message.webPage.length)
-                    for (var i = 0; i < message.webPage.length; ++i)
-                        $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.encode(message.webPage[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-                return writer;
-            };
-
-            /**
-             * Encodes the specified WebTool message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.WebTool.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IWebTool} message WebTool message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            WebTool.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-
-            /**
-             * Decodes a WebTool message from the specified reader or buffer.
-             * @function decode
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool} WebTool
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            WebTool.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Message.WebTool();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1: {
-                            if (!(message.webPage && message.webPage.length))
-                                message.webPage = [];
-                            message.webPage.push($root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.decode(reader, reader.uint32()));
-                            break;
-                        }
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-
-            /**
-             * Decodes a WebTool message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool} WebTool
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            WebTool.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-
-            /**
-             * Verifies a WebTool message.
-             * @function verify
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            WebTool.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.webPage != null && message.hasOwnProperty("webPage")) {
-                    if (!Array.isArray(message.webPage))
-                        return "webPage: array expected";
-                    for (var i = 0; i < message.webPage.length; ++i) {
-                        var error = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.verify(message.webPage[i]);
-                        if (error)
-                            return "webPage." + error;
-                    }
-                }
-                return null;
-            };
-
-            /**
-             * Creates a WebTool message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool} WebTool
-             */
-            WebTool.fromObject = function fromObject(object) {
-                if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Message.WebTool)
-                    return object;
-                var message = new $root.StreamUnifiedChatWithToolsResponse.Message.WebTool();
-                if (object.webPage) {
-                    if (!Array.isArray(object.webPage))
-                        throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.WebTool.webPage: array expected");
-                    message.webPage = [];
-                    for (var i = 0; i < object.webPage.length; ++i) {
-                        if (typeof object.webPage[i] !== "object")
-                            throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.WebTool.webPage: object expected");
-                        message.webPage[i] = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.fromObject(object.webPage[i]);
-                    }
-                }
-                return message;
-            };
-
-            /**
-             * Creates a plain object from a WebTool message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool} message WebTool
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            WebTool.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.arrays || options.defaults)
-                    object.webPage = [];
-                if (message.webPage && message.webPage.length) {
-                    object.webPage = [];
-                    for (var j = 0; j < message.webPage.length; ++j)
-                        object.webPage[j] = $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.toObject(message.webPage[j], options);
-                }
-                return object;
-            };
-
-            /**
-             * Converts this WebTool to JSON.
-             * @function toJSON
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            WebTool.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-
-            /**
-             * Gets the default type url for WebTool
-             * @function getTypeUrl
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-             * @static
-             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns {string} The default type url
-             */
-            WebTool.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                if (typeUrlPrefix === undefined) {
-                    typeUrlPrefix = "type.googleapis.com";
-                }
-                return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Message.WebTool";
-            };
-
-            WebTool.WebPage = (function() {
-
-                /**
-                 * Properties of a WebPage.
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-                 * @interface IWebPage
-                 * @property {string|null} [url] WebPage url
-                 * @property {string|null} [title] WebPage title
-                 * @property {string|null} [content] WebPage content
-                 */
-
-                /**
-                 * Constructs a new WebPage.
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool
-                 * @classdesc Represents a WebPage.
-                 * @implements IWebPage
-                 * @constructor
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage=} [properties] Properties to set
-                 */
-                function WebPage(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * WebPage url.
-                 * @member {string} url
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @instance
-                 */
-                WebPage.prototype.url = "";
-
-                /**
-                 * WebPage title.
-                 * @member {string} title
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @instance
-                 */
-                WebPage.prototype.title = "";
-
-                /**
-                 * WebPage content.
-                 * @member {string} content
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @instance
-                 */
-                WebPage.prototype.content = "";
-
-                /**
-                 * Creates a new WebPage instance using the specified properties.
-                 * @function create
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage=} [properties] Properties to set
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage} WebPage instance
-                 */
-                WebPage.create = function create(properties) {
-                    return new WebPage(properties);
-                };
-
-                /**
-                 * Encodes the specified WebPage message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.verify|verify} messages.
-                 * @function encode
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage} message WebPage message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                WebPage.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.url != null && Object.hasOwnProperty.call(message, "url"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.url);
-                    if (message.title != null && Object.hasOwnProperty.call(message, "title"))
-                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.title);
-                    if (message.content != null && Object.hasOwnProperty.call(message, "content"))
-                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.content);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified WebPage message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool.IWebPage} message WebPage message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                WebPage.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes a WebPage message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage} WebPage
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                WebPage.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1: {
-                                message.url = reader.string();
-                                break;
-                            }
-                        case 2: {
-                                message.title = reader.string();
-                                break;
-                            }
-                        case 3: {
-                                message.content = reader.string();
-                                break;
-                            }
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes a WebPage message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage} WebPage
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                WebPage.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies a WebPage message.
-                 * @function verify
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                WebPage.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.url != null && message.hasOwnProperty("url"))
-                        if (!$util.isString(message.url))
-                            return "url: string expected";
-                    if (message.title != null && message.hasOwnProperty("title"))
-                        if (!$util.isString(message.title))
-                            return "title: string expected";
-                    if (message.content != null && message.hasOwnProperty("content"))
-                        if (!$util.isString(message.content))
-                            return "content: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates a WebPage message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage} WebPage
-                 */
-                WebPage.fromObject = function fromObject(object) {
-                    if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage)
-                        return object;
-                    var message = new $root.StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage();
-                    if (object.url != null)
-                        message.url = String(object.url);
-                    if (object.title != null)
-                        message.title = String(object.title);
-                    if (object.content != null)
-                        message.content = String(object.content);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from a WebPage message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage} message WebPage
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                WebPage.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.url = "";
-                        object.title = "";
-                        object.content = "";
-                    }
-                    if (message.url != null && message.hasOwnProperty("url"))
-                        object.url = message.url;
-                    if (message.title != null && message.hasOwnProperty("title"))
-                        object.title = message.title;
-                    if (message.content != null && message.hasOwnProperty("content"))
-                        object.content = message.content;
-                    return object;
-                };
-
-                /**
-                 * Converts this WebPage to JSON.
-                 * @function toJSON
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                WebPage.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                /**
-                 * Gets the default type url for WebPage
-                 * @function getTypeUrl
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                WebPage.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Message.WebTool.WebPage";
-                };
-
-                return WebPage;
-            })();
-
-            return WebTool;
-        })();
-
-        Message.Unknown12 = (function() {
-
-            /**
-             * Properties of an Unknown12.
-             * @memberof StreamUnifiedChatWithToolsResponse.Message
-             * @interface IUnknown12
-             * @property {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent|null} [content] Unknown12 content
-             */
-
-            /**
-             * Constructs a new Unknown12.
-             * @memberof StreamUnifiedChatWithToolsResponse.Message
-             * @classdesc Represents an Unknown12.
-             * @implements IUnknown12
-             * @constructor
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IUnknown12=} [properties] Properties to set
-             */
-            function Unknown12(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-
-            /**
-             * Unknown12 content.
-             * @member {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent|null|undefined} content
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @instance
-             */
-            Unknown12.prototype.content = null;
-
-            /**
-             * Creates a new Unknown12 instance using the specified properties.
-             * @function create
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IUnknown12=} [properties] Properties to set
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12} Unknown12 instance
-             */
-            Unknown12.create = function create(properties) {
-                return new Unknown12(properties);
-            };
-
-            /**
-             * Encodes the specified Unknown12 message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.Unknown12.verify|verify} messages.
-             * @function encode
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IUnknown12} message Unknown12 message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Unknown12.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.content != null && Object.hasOwnProperty.call(message, "content"))
-                    $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.encode(message.content, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-                return writer;
-            };
-
-            /**
-             * Encodes the specified Unknown12 message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.Unknown12.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.IUnknown12} message Unknown12 message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Unknown12.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-
-            /**
-             * Decodes an Unknown12 message from the specified reader or buffer.
-             * @function decode
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12} Unknown12
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Unknown12.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1: {
-                            message.content = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.decode(reader, reader.uint32());
-                            break;
-                        }
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-
-            /**
-             * Decodes an Unknown12 message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12} Unknown12
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Unknown12.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-
-            /**
-             * Verifies an Unknown12 message.
-             * @function verify
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            Unknown12.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.content != null && message.hasOwnProperty("content")) {
-                    var error = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.verify(message.content);
-                    if (error)
-                        return "content." + error;
-                }
-                return null;
-            };
-
-            /**
-             * Creates an Unknown12 message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12} Unknown12
-             */
-            Unknown12.fromObject = function fromObject(object) {
-                if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12)
-                    return object;
-                var message = new $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12();
-                if (object.content != null) {
-                    if (typeof object.content !== "object")
-                        throw TypeError(".StreamUnifiedChatWithToolsResponse.Message.Unknown12.content: object expected");
-                    message.content = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.fromObject(object.content);
-                }
-                return message;
-            };
-
-            /**
-             * Creates a plain object from an Unknown12 message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12} message Unknown12
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            Unknown12.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults)
-                    object.content = null;
-                if (message.content != null && message.hasOwnProperty("content"))
-                    object.content = $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.toObject(message.content, options);
-                return object;
-            };
-
-            /**
-             * Converts this Unknown12 to JSON.
-             * @function toJSON
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            Unknown12.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-
-            /**
-             * Gets the default type url for Unknown12
-             * @function getTypeUrl
-             * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-             * @static
-             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns {string} The default type url
-             */
-            Unknown12.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                if (typeUrlPrefix === undefined) {
-                    typeUrlPrefix = "type.googleapis.com";
-                }
-                return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Message.Unknown12";
-            };
-
-            Unknown12.Content = (function() {
-
-                /**
-                 * Properties of a Content.
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-                 * @interface IContent
-                 * @property {string|null} [content] Content content
-                 */
-
-                /**
-                 * Constructs a new Content.
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12
-                 * @classdesc Represents a Content.
-                 * @implements IContent
-                 * @constructor
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent=} [properties] Properties to set
-                 */
-                function Content(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * Content content.
-                 * @member {string} content
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @instance
-                 */
-                Content.prototype.content = "";
-
-                /**
-                 * Creates a new Content instance using the specified properties.
-                 * @function create
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent=} [properties] Properties to set
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content} Content instance
-                 */
-                Content.create = function create(properties) {
-                    return new Content(properties);
-                };
-
-                /**
-                 * Encodes the specified Content message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.verify|verify} messages.
-                 * @function encode
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent} message Content message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Content.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.content != null && Object.hasOwnProperty.call(message, "content"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.content);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified Content message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12.IContent} message Content message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Content.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes a Content message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content} Content
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Content.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1: {
-                                message.content = reader.string();
-                                break;
-                            }
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes a Content message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content} Content
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Content.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies a Content message.
-                 * @function verify
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                Content.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.content != null && message.hasOwnProperty("content"))
-                        if (!$util.isString(message.content))
-                            return "content: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates a Content message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content} Content
-                 */
-                Content.fromObject = function fromObject(object) {
-                    if (object instanceof $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content)
-                        return object;
-                    var message = new $root.StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content();
-                    if (object.content != null)
-                        message.content = String(object.content);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from a Content message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content} message Content
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Content.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.content = "";
-                    if (message.content != null && message.hasOwnProperty("content"))
-                        object.content = message.content;
-                    return object;
-                };
-
-                /**
-                 * Converts this Content to JSON.
-                 * @function toJSON
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Content.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                /**
-                 * Gets the default type url for Content
-                 * @function getTypeUrl
-                 * @memberof StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                Content.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.Message.Unknown12.Content";
-                };
-
-                return Content;
-            })();
-
-            return Unknown12;
-        })();
-
-        return Message;
+        return Thinking;
     })();
 
-    StreamUnifiedChatWithToolsResponse.ToolCall = (function() {
+    StreamUnifiedChatWithToolsResponse.ToolCallV2 = (function() {
 
         /**
-         * Properties of a ToolCall.
+         * Properties of a ToolCallV2.
          * @memberof StreamUnifiedChatWithToolsResponse
-         * @interface IToolCall
-         * @property {ClientSideToolV2|null} [tool] ToolCall tool
-         * @property {string|null} [toolCallId] ToolCall toolCallId
-         * @property {string|null} [name] ToolCall name
-         * @property {string|null} [rawArgs] ToolCall rawArgs
+         * @interface IToolCallV2
+         * @property {ClientSideToolV2|null} [tool] ToolCallV2 tool
+         * @property {string|null} [toolCallId] ToolCallV2 toolCallId
+         * @property {string|null} [name] ToolCallV2 name
+         * @property {string|null} [rawArgs] ToolCallV2 rawArgs
          */
 
         /**
-         * Constructs a new ToolCall.
+         * Constructs a new ToolCallV2.
          * @memberof StreamUnifiedChatWithToolsResponse
-         * @classdesc Represents a ToolCall.
-         * @implements IToolCall
+         * @classdesc Represents a ToolCallV2.
+         * @implements IToolCallV2
          * @constructor
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCall=} [properties] Properties to set
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV2=} [properties] Properties to set
          */
-        function ToolCall(properties) {
+        function ToolCallV2(properties) {
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -6722,59 +5775,59 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         }
 
         /**
-         * ToolCall tool.
+         * ToolCallV2 tool.
          * @member {ClientSideToolV2} tool
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @instance
          */
-        ToolCall.prototype.tool = 0;
+        ToolCallV2.prototype.tool = 0;
 
         /**
-         * ToolCall toolCallId.
+         * ToolCallV2 toolCallId.
          * @member {string} toolCallId
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @instance
          */
-        ToolCall.prototype.toolCallId = "";
+        ToolCallV2.prototype.toolCallId = "";
 
         /**
-         * ToolCall name.
+         * ToolCallV2 name.
          * @member {string} name
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @instance
          */
-        ToolCall.prototype.name = "";
+        ToolCallV2.prototype.name = "";
 
         /**
-         * ToolCall rawArgs.
+         * ToolCallV2 rawArgs.
          * @member {string} rawArgs
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @instance
          */
-        ToolCall.prototype.rawArgs = "";
+        ToolCallV2.prototype.rawArgs = "";
 
         /**
-         * Creates a new ToolCall instance using the specified properties.
+         * Creates a new ToolCallV2 instance using the specified properties.
          * @function create
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCall=} [properties] Properties to set
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall instance
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV2=} [properties] Properties to set
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV2} ToolCallV2 instance
          */
-        ToolCall.create = function create(properties) {
-            return new ToolCall(properties);
+        ToolCallV2.create = function create(properties) {
+            return new ToolCallV2(properties);
         };
 
         /**
-         * Encodes the specified ToolCall message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCall.verify|verify} messages.
+         * Encodes the specified ToolCallV2 message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV2.verify|verify} messages.
          * @function encode
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCall} message ToolCall message or plain object to encode
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV2} message ToolCallV2 message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        ToolCall.encode = function encode(message, writer) {
+        ToolCallV2.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
             if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
@@ -6789,33 +5842,33 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Encodes the specified ToolCall message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCall.verify|verify} messages.
+         * Encodes the specified ToolCallV2 message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV2.verify|verify} messages.
          * @function encodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.IToolCall} message ToolCall message or plain object to encode
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV2} message ToolCallV2 message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        ToolCall.encodeDelimited = function encodeDelimited(message, writer) {
+        ToolCallV2.encodeDelimited = function encodeDelimited(message, writer) {
             return this.encode(message, writer).ldelim();
         };
 
         /**
-         * Decodes a ToolCall message from the specified reader or buffer.
+         * Decodes a ToolCallV2 message from the specified reader or buffer.
          * @function decode
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
          * @param {number} [length] Message length if known beforehand
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV2} ToolCallV2
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        ToolCall.decode = function decode(reader, length) {
+        ToolCallV2.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ToolCall();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV2();
             while (reader.pos < end) {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
@@ -6844,30 +5897,30 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Decodes a ToolCall message from the specified reader or buffer, length delimited.
+         * Decodes a ToolCallV2 message from the specified reader or buffer, length delimited.
          * @function decodeDelimited
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV2} ToolCallV2
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        ToolCall.decodeDelimited = function decodeDelimited(reader) {
+        ToolCallV2.decodeDelimited = function decodeDelimited(reader) {
             if (!(reader instanceof $Reader))
                 reader = new $Reader(reader);
             return this.decode(reader, reader.uint32());
         };
 
         /**
-         * Verifies a ToolCall message.
+         * Verifies a ToolCallV2 message.
          * @function verify
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
          * @param {Object.<string,*>} message Plain object to verify
          * @returns {string|null} `null` if valid, otherwise the reason why it is not
          */
-        ToolCall.verify = function verify(message) {
+        ToolCallV2.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.tool != null && message.hasOwnProperty("tool"))
@@ -6906,17 +5959,17 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Creates a ToolCall message from a plain object. Also converts values to their respective internal types.
+         * Creates a ToolCallV2 message from a plain object. Also converts values to their respective internal types.
          * @function fromObject
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
          * @param {Object.<string,*>} object Plain object
-         * @returns {StreamUnifiedChatWithToolsResponse.ToolCall} ToolCall
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV2} ToolCallV2
          */
-        ToolCall.fromObject = function fromObject(object) {
-            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ToolCall)
+        ToolCallV2.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ToolCallV2)
                 return object;
-            var message = new $root.StreamUnifiedChatWithToolsResponse.ToolCall();
+            var message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV2();
             switch (object.tool) {
             default:
                 if (typeof object.tool === "number") {
@@ -7003,15 +6056,15 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Creates a plain object from a ToolCall message. Also converts values to other types if specified.
+         * Creates a plain object from a ToolCallV2 message. Also converts values to other types if specified.
          * @function toObject
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
-         * @param {StreamUnifiedChatWithToolsResponse.ToolCall} message ToolCall
+         * @param {StreamUnifiedChatWithToolsResponse.ToolCallV2} message ToolCallV2
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        ToolCall.toObject = function toObject(message, options) {
+        ToolCallV2.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
             var object = {};
@@ -7033,32 +6086,282 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         };
 
         /**
-         * Converts this ToolCall to JSON.
+         * Converts this ToolCallV2 to JSON.
          * @function toJSON
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @instance
          * @returns {Object.<string,*>} JSON object
          */
-        ToolCall.prototype.toJSON = function toJSON() {
+        ToolCallV2.prototype.toJSON = function toJSON() {
             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
         };
 
         /**
-         * Gets the default type url for ToolCall
+         * Gets the default type url for ToolCallV2
          * @function getTypeUrl
-         * @memberof StreamUnifiedChatWithToolsResponse.ToolCall
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV2
          * @static
          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns {string} The default type url
          */
-        ToolCall.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        ToolCallV2.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
             if (typeUrlPrefix === undefined) {
                 typeUrlPrefix = "type.googleapis.com";
             }
-            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ToolCall";
+            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ToolCallV2";
         };
 
-        return ToolCall;
+        return ToolCallV2;
+    })();
+
+    StreamUnifiedChatWithToolsResponse.ToolCallV1 = (function() {
+
+        /**
+         * Properties of a ToolCallV1.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @interface IToolCallV1
+         * @property {string|null} [toolCallId] ToolCallV1 toolCallId
+         * @property {string|null} [name] ToolCallV1 name
+         * @property {string|null} ["arguments"] ToolCallV1 arguments
+         */
+
+        /**
+         * Constructs a new ToolCallV1.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @classdesc Represents a ToolCallV1.
+         * @implements IToolCallV1
+         * @constructor
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1=} [properties] Properties to set
+         */
+        function ToolCallV1(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ToolCallV1 toolCallId.
+         * @member {string} toolCallId
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype.toolCallId = "";
+
+        /**
+         * ToolCallV1 name.
+         * @member {string} name
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype.name = "";
+
+        /**
+         * ToolCallV1 arguments.
+         * @member {string} arguments
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @instance
+         */
+        ToolCallV1.prototype["arguments"] = "";
+
+        /**
+         * Creates a new ToolCallV1 instance using the specified properties.
+         * @function create
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1=} [properties] Properties to set
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1 instance
+         */
+        ToolCallV1.create = function create(properties) {
+            return new ToolCallV1(properties);
+        };
+
+        /**
+         * Encodes the specified ToolCallV1 message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV1.verify|verify} messages.
+         * @function encode
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCallV1.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.toolCallId != null && Object.hasOwnProperty.call(message, "toolCallId"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.toolCallId);
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.name);
+            if (message["arguments"] != null && Object.hasOwnProperty.call(message, "arguments"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message["arguments"]);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ToolCallV1 message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ToolCallV1.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IToolCallV1} message ToolCallV1 message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ToolCallV1.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ToolCallV1 message from the specified reader or buffer.
+         * @function decode
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCallV1.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV1();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.toolCallId = reader.string();
+                        break;
+                    }
+                case 2: {
+                        message.name = reader.string();
+                        break;
+                    }
+                case 3: {
+                        message["arguments"] = reader.string();
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ToolCallV1 message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ToolCallV1.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ToolCallV1 message.
+         * @function verify
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ToolCallV1.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                if (!$util.isString(message.toolCallId))
+                    return "toolCallId: string expected";
+            if (message.name != null && message.hasOwnProperty("name"))
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
+                if (!$util.isString(message["arguments"]))
+                    return "arguments: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ToolCallV1 message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {StreamUnifiedChatWithToolsResponse.ToolCallV1} ToolCallV1
+         */
+        ToolCallV1.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ToolCallV1)
+                return object;
+            var message = new $root.StreamUnifiedChatWithToolsResponse.ToolCallV1();
+            if (object.toolCallId != null)
+                message.toolCallId = String(object.toolCallId);
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object["arguments"] != null)
+                message["arguments"] = String(object["arguments"]);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ToolCallV1 message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.ToolCallV1} message ToolCallV1
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ToolCallV1.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.toolCallId = "";
+                object.name = "";
+                object["arguments"] = "";
+            }
+            if (message.toolCallId != null && message.hasOwnProperty("toolCallId"))
+                object.toolCallId = message.toolCallId;
+            if (message.name != null && message.hasOwnProperty("name"))
+                object.name = message.name;
+            if (message["arguments"] != null && message.hasOwnProperty("arguments"))
+                object["arguments"] = message["arguments"];
+            return object;
+        };
+
+        /**
+         * Converts this ToolCallV1 to JSON.
+         * @function toJSON
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ToolCallV1.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ToolCallV1
+         * @function getTypeUrl
+         * @memberof StreamUnifiedChatWithToolsResponse.ToolCallV1
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ToolCallV1.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ToolCallV1";
+        };
+
+        return ToolCallV1;
     })();
 
     return StreamUnifiedChatWithToolsResponse;

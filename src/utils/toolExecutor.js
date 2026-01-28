@@ -21,13 +21,16 @@ class ToolExecutor {
    * @returns {Object} - { success, data, error }
    */
   execute(toolCall) {
-    const { tool, rawArgs } = toolCall;
+    const { tool, rawArgs, params: providedParams } = toolCall;
     
-    let params = {};
-    try {
-      params = rawArgs ? JSON.parse(rawArgs) : {};
-    } catch (e) {
-      return { success: false, data: {}, error: 'Failed to parse tool arguments' };
+    // Use provided params if available, otherwise parse from rawArgs
+    let params = providedParams || {};
+    if (!providedParams && rawArgs) {
+      try {
+        params = JSON.parse(rawArgs);
+      } catch (e) {
+        return { success: false, data: {}, error: 'Failed to parse tool arguments' };
+      }
     }
 
     try {
