@@ -2,6 +2,8 @@
 
 OpenAI-compatible API proxy for Cursor Editor with **full agent mode and tool calling support**.
 
+> **Compatible with Cursor 2.3.41** - Protocol implementation based on reverse-engineered protobuf schemas.
+
 ## Features
 
 - **OpenAI API compatibility** - Works with any OpenAI client (Python, Node.js, curl, etc.)
@@ -158,13 +160,29 @@ npm run proto
 
 ## Compatibility
 
-Tested with Cursor 2.3.41. Protocol details derived from reverse engineering analysis.
+**Tested with Cursor 2.3.41**
+
+The protobuf schemas and protocol details were derived from reverse engineering Cursor's `workbench.desktop.main.js`. Key discoveries:
+- `StreamUnifiedChatWithTools` RPC for bidirectional streaming
+- `ClientSideToolV2` enum with 44 tool types
+- `isAgentic` (field 27) and `supportedTools` (field 29) for agent mode
+- Tool call/result message formats
+
+## Reverse Engineering
+
+The protocol analysis and standalone proof-of-concept implementations are available at:
+
+**[eisbaw/cursor_api_demo](https://github.com/eisbaw/cursor_api_demo)** - Python PoC with:
+- Protobuf wire format encoder/decoder
+- HTTP/2 bidirectional streaming client (h2 library)
+- Tool call detection and result encoding
+- Analysis documents (TASK-7, TASK-26, TASK-110)
 
 ## Credits
 
 - Fork of [JiuZ-Chn/Cursor-To-OpenAI](https://github.com/JiuZ-Chn/Cursor-To-OpenAI)
 - Based on [zhx47/cursor-api](https://github.com/zhx47/cursor-api)
-- Agent mode implementation based on protobuf analysis from cursor-decompiled project
+- Protocol analysis from [eisbaw/cursor_api_demo](https://github.com/eisbaw/cursor_api_demo)
 
 ## License
 
