@@ -112,11 +112,6 @@ message StreamUnifiedChatWithToolsRequest {
       int32 role = 3;
     }
 
-    // Supported tools for agent mode - see TASK-110-tool-enum-mapping.md
-    message SupportedTool {
-      ClientSideToolV2 tool = 1;
-    }
-
     repeated Message messages = 1;
     int32 unknown2 = 2; // 1
     Instruction instruction = 3;
@@ -130,19 +125,11 @@ message StreamUnifiedChatWithToolsRequest {
     int32 unknown22 = 22; // 1
     string conversationId = 23; // uuid
     Metadata metadata = 26;
-    int32 unknown27 = 27; // 1
-    string unknown29 = 29;
+    bool isAgentic = 27; // true for agent mode - see TASK-7-protobuf-schemas.md
+    repeated ClientSideToolV2 supportedTools = 29; // Agent mode tools - see TASK-7
     repeated MessageId messageIds = 30;
     int32 largeContext = 35; // 1
     int32 unknown38 = 38; // 0
-    repeated SupportedTool supportedTools = 45; // Agent mode tools
-    int32 chatModeEnum = 46; // 1 for ask, 3 for agent
-    string unknown47 = 47; 
-    int32 unknown48 = 48; // 0
-    int32 unknown49 = 49; // 0
-    int32 unknown51 = 51; // 0
-    int32 unknown53 = 53; // 0
-    string chatMode = 54; // "Ask" or "Agent"
   }
   
   Request request = 1;

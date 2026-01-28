@@ -2002,19 +2002,11 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
          * @property {number|null} [unknown22] Request unknown22
          * @property {string|null} [conversationId] Request conversationId
          * @property {StreamUnifiedChatWithToolsRequest.Request.IMetadata|null} [metadata] Request metadata
-         * @property {number|null} [unknown27] Request unknown27
-         * @property {string|null} [unknown29] Request unknown29
+         * @property {boolean|null} [isAgentic] Request isAgentic
+         * @property {Array.<ClientSideToolV2>|null} [supportedTools] Request supportedTools
          * @property {Array.<StreamUnifiedChatWithToolsRequest.Request.IMessageId>|null} [messageIds] Request messageIds
          * @property {number|null} [largeContext] Request largeContext
          * @property {number|null} [unknown38] Request unknown38
-         * @property {Array.<StreamUnifiedChatWithToolsRequest.Request.ISupportedTool>|null} [supportedTools] Request supportedTools
-         * @property {number|null} [chatModeEnum] Request chatModeEnum
-         * @property {string|null} [unknown47] Request unknown47
-         * @property {number|null} [unknown48] Request unknown48
-         * @property {number|null} [unknown49] Request unknown49
-         * @property {number|null} [unknown51] Request unknown51
-         * @property {number|null} [unknown53] Request unknown53
-         * @property {string|null} [chatMode] Request chatMode
          */
 
         /**
@@ -2028,8 +2020,8 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
         function Request(properties) {
             this.messages = [];
             this.wikiTool = [];
-            this.messageIds = [];
             this.supportedTools = [];
+            this.messageIds = [];
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -2141,20 +2133,20 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
         Request.prototype.metadata = null;
 
         /**
-         * Request unknown27.
-         * @member {number} unknown27
+         * Request isAgentic.
+         * @member {boolean} isAgentic
          * @memberof StreamUnifiedChatWithToolsRequest.Request
          * @instance
          */
-        Request.prototype.unknown27 = 0;
+        Request.prototype.isAgentic = false;
 
         /**
-         * Request unknown29.
-         * @member {string} unknown29
+         * Request supportedTools.
+         * @member {Array.<ClientSideToolV2>} supportedTools
          * @memberof StreamUnifiedChatWithToolsRequest.Request
          * @instance
          */
-        Request.prototype.unknown29 = "";
+        Request.prototype.supportedTools = $util.emptyArray;
 
         /**
          * Request messageIds.
@@ -2179,70 +2171,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
          * @instance
          */
         Request.prototype.unknown38 = 0;
-
-        /**
-         * Request supportedTools.
-         * @member {Array.<StreamUnifiedChatWithToolsRequest.Request.ISupportedTool>} supportedTools
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.supportedTools = $util.emptyArray;
-
-        /**
-         * Request chatModeEnum.
-         * @member {number} chatModeEnum
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.chatModeEnum = 0;
-
-        /**
-         * Request unknown47.
-         * @member {string} unknown47
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.unknown47 = "";
-
-        /**
-         * Request unknown48.
-         * @member {number} unknown48
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.unknown48 = 0;
-
-        /**
-         * Request unknown49.
-         * @member {number} unknown49
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.unknown49 = 0;
-
-        /**
-         * Request unknown51.
-         * @member {number} unknown51
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.unknown51 = 0;
-
-        /**
-         * Request unknown53.
-         * @member {number} unknown53
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.unknown53 = 0;
-
-        /**
-         * Request chatMode.
-         * @member {string} chatMode
-         * @memberof StreamUnifiedChatWithToolsRequest.Request
-         * @instance
-         */
-        Request.prototype.chatMode = "";
 
         /**
          * Creates a new Request instance using the specified properties.
@@ -2296,10 +2224,14 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 writer.uint32(/* id 23, wireType 2 =*/186).string(message.conversationId);
             if (message.metadata != null && Object.hasOwnProperty.call(message, "metadata"))
                 $root.StreamUnifiedChatWithToolsRequest.Request.Metadata.encode(message.metadata, writer.uint32(/* id 26, wireType 2 =*/210).fork()).ldelim();
-            if (message.unknown27 != null && Object.hasOwnProperty.call(message, "unknown27"))
-                writer.uint32(/* id 27, wireType 0 =*/216).int32(message.unknown27);
-            if (message.unknown29 != null && Object.hasOwnProperty.call(message, "unknown29"))
-                writer.uint32(/* id 29, wireType 2 =*/234).string(message.unknown29);
+            if (message.isAgentic != null && Object.hasOwnProperty.call(message, "isAgentic"))
+                writer.uint32(/* id 27, wireType 0 =*/216).bool(message.isAgentic);
+            if (message.supportedTools != null && message.supportedTools.length) {
+                writer.uint32(/* id 29, wireType 2 =*/234).fork();
+                for (var i = 0; i < message.supportedTools.length; ++i)
+                    writer.int32(message.supportedTools[i]);
+                writer.ldelim();
+            }
             if (message.messageIds != null && message.messageIds.length)
                 for (var i = 0; i < message.messageIds.length; ++i)
                     $root.StreamUnifiedChatWithToolsRequest.Request.MessageId.encode(message.messageIds[i], writer.uint32(/* id 30, wireType 2 =*/242).fork()).ldelim();
@@ -2307,23 +2239,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 writer.uint32(/* id 35, wireType 0 =*/280).int32(message.largeContext);
             if (message.unknown38 != null && Object.hasOwnProperty.call(message, "unknown38"))
                 writer.uint32(/* id 38, wireType 0 =*/304).int32(message.unknown38);
-            if (message.supportedTools != null && message.supportedTools.length)
-                for (var i = 0; i < message.supportedTools.length; ++i)
-                    $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.encode(message.supportedTools[i], writer.uint32(/* id 45, wireType 2 =*/362).fork()).ldelim();
-            if (message.chatModeEnum != null && Object.hasOwnProperty.call(message, "chatModeEnum"))
-                writer.uint32(/* id 46, wireType 0 =*/368).int32(message.chatModeEnum);
-            if (message.unknown47 != null && Object.hasOwnProperty.call(message, "unknown47"))
-                writer.uint32(/* id 47, wireType 2 =*/378).string(message.unknown47);
-            if (message.unknown48 != null && Object.hasOwnProperty.call(message, "unknown48"))
-                writer.uint32(/* id 48, wireType 0 =*/384).int32(message.unknown48);
-            if (message.unknown49 != null && Object.hasOwnProperty.call(message, "unknown49"))
-                writer.uint32(/* id 49, wireType 0 =*/392).int32(message.unknown49);
-            if (message.unknown51 != null && Object.hasOwnProperty.call(message, "unknown51"))
-                writer.uint32(/* id 51, wireType 0 =*/408).int32(message.unknown51);
-            if (message.unknown53 != null && Object.hasOwnProperty.call(message, "unknown53"))
-                writer.uint32(/* id 53, wireType 0 =*/424).int32(message.unknown53);
-            if (message.chatMode != null && Object.hasOwnProperty.call(message, "chatMode"))
-                writer.uint32(/* id 54, wireType 2 =*/434).string(message.chatMode);
             return writer;
         };
 
@@ -2415,11 +2330,18 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                         break;
                     }
                 case 27: {
-                        message.unknown27 = reader.int32();
+                        message.isAgentic = reader.bool();
                         break;
                     }
                 case 29: {
-                        message.unknown29 = reader.string();
+                        if (!(message.supportedTools && message.supportedTools.length))
+                            message.supportedTools = [];
+                        if ((tag & 7) === 2) {
+                            var end2 = reader.uint32() + reader.pos;
+                            while (reader.pos < end2)
+                                message.supportedTools.push(reader.int32());
+                        } else
+                            message.supportedTools.push(reader.int32());
                         break;
                     }
                 case 30: {
@@ -2434,40 +2356,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                     }
                 case 38: {
                         message.unknown38 = reader.int32();
-                        break;
-                    }
-                case 45: {
-                        if (!(message.supportedTools && message.supportedTools.length))
-                            message.supportedTools = [];
-                        message.supportedTools.push($root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.decode(reader, reader.uint32()));
-                        break;
-                    }
-                case 46: {
-                        message.chatModeEnum = reader.int32();
-                        break;
-                    }
-                case 47: {
-                        message.unknown47 = reader.string();
-                        break;
-                    }
-                case 48: {
-                        message.unknown48 = reader.int32();
-                        break;
-                    }
-                case 49: {
-                        message.unknown49 = reader.int32();
-                        break;
-                    }
-                case 51: {
-                        message.unknown51 = reader.int32();
-                        break;
-                    }
-                case 53: {
-                        message.unknown53 = reader.int32();
-                        break;
-                    }
-                case 54: {
-                        message.chatMode = reader.string();
                         break;
                     }
                 default:
@@ -2562,12 +2450,36 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 if (error)
                     return "metadata." + error;
             }
-            if (message.unknown27 != null && message.hasOwnProperty("unknown27"))
-                if (!$util.isInteger(message.unknown27))
-                    return "unknown27: integer expected";
-            if (message.unknown29 != null && message.hasOwnProperty("unknown29"))
-                if (!$util.isString(message.unknown29))
-                    return "unknown29: string expected";
+            if (message.isAgentic != null && message.hasOwnProperty("isAgentic"))
+                if (typeof message.isAgentic !== "boolean")
+                    return "isAgentic: boolean expected";
+            if (message.supportedTools != null && message.hasOwnProperty("supportedTools")) {
+                if (!Array.isArray(message.supportedTools))
+                    return "supportedTools: array expected";
+                for (var i = 0; i < message.supportedTools.length; ++i)
+                    switch (message.supportedTools[i]) {
+                    default:
+                        return "supportedTools: enum value[] expected";
+                    case 0:
+                    case 1:
+                    case 3:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 11:
+                    case 12:
+                    case 15:
+                    case 16:
+                    case 18:
+                    case 19:
+                    case 23:
+                    case 31:
+                    case 42:
+                        break;
+                    }
+            }
             if (message.messageIds != null && message.hasOwnProperty("messageIds")) {
                 if (!Array.isArray(message.messageIds))
                     return "messageIds: array expected";
@@ -2583,36 +2495,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 if (!$util.isInteger(message.unknown38))
                     return "unknown38: integer expected";
-            if (message.supportedTools != null && message.hasOwnProperty("supportedTools")) {
-                if (!Array.isArray(message.supportedTools))
-                    return "supportedTools: array expected";
-                for (var i = 0; i < message.supportedTools.length; ++i) {
-                    var error = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify(message.supportedTools[i]);
-                    if (error)
-                        return "supportedTools." + error;
-                }
-            }
-            if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
-                if (!$util.isInteger(message.chatModeEnum))
-                    return "chatModeEnum: integer expected";
-            if (message.unknown47 != null && message.hasOwnProperty("unknown47"))
-                if (!$util.isString(message.unknown47))
-                    return "unknown47: string expected";
-            if (message.unknown48 != null && message.hasOwnProperty("unknown48"))
-                if (!$util.isInteger(message.unknown48))
-                    return "unknown48: integer expected";
-            if (message.unknown49 != null && message.hasOwnProperty("unknown49"))
-                if (!$util.isInteger(message.unknown49))
-                    return "unknown49: integer expected";
-            if (message.unknown51 != null && message.hasOwnProperty("unknown51"))
-                if (!$util.isInteger(message.unknown51))
-                    return "unknown51: integer expected";
-            if (message.unknown53 != null && message.hasOwnProperty("unknown53"))
-                if (!$util.isInteger(message.unknown53))
-                    return "unknown53: integer expected";
-            if (message.chatMode != null && message.hasOwnProperty("chatMode"))
-                if (!$util.isString(message.chatMode))
-                    return "chatMode: string expected";
             return null;
         };
 
@@ -2679,10 +2561,89 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                     throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.metadata: object expected");
                 message.metadata = $root.StreamUnifiedChatWithToolsRequest.Request.Metadata.fromObject(object.metadata);
             }
-            if (object.unknown27 != null)
-                message.unknown27 = object.unknown27 | 0;
-            if (object.unknown29 != null)
-                message.unknown29 = String(object.unknown29);
+            if (object.isAgentic != null)
+                message.isAgentic = Boolean(object.isAgentic);
+            if (object.supportedTools) {
+                if (!Array.isArray(object.supportedTools))
+                    throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.supportedTools: array expected");
+                message.supportedTools = [];
+                for (var i = 0; i < object.supportedTools.length; ++i)
+                    switch (object.supportedTools[i]) {
+                    default:
+                        if (typeof object.supportedTools[i] === "number") {
+                            message.supportedTools[i] = object.supportedTools[i];
+                            break;
+                        }
+                    case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
+                    case 0:
+                        message.supportedTools[i] = 0;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
+                    case 1:
+                        message.supportedTools[i] = 1;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
+                    case 3:
+                        message.supportedTools[i] = 3;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_READ_FILE":
+                    case 5:
+                        message.supportedTools[i] = 5;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
+                    case 6:
+                        message.supportedTools[i] = 6;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
+                    case 7:
+                        message.supportedTools[i] = 7;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
+                    case 8:
+                        message.supportedTools[i] = 8;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
+                    case 9:
+                        message.supportedTools[i] = 9;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
+                    case 11:
+                        message.supportedTools[i] = 11;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_REAPPLY":
+                    case 12:
+                        message.supportedTools[i] = 12;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
+                    case 15:
+                        message.supportedTools[i] = 15;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
+                    case 16:
+                        message.supportedTools[i] = 16;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
+                    case 18:
+                        message.supportedTools[i] = 18;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_MCP":
+                    case 19:
+                        message.supportedTools[i] = 19;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
+                    case 23:
+                        message.supportedTools[i] = 23;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
+                    case 31:
+                        message.supportedTools[i] = 31;
+                        break;
+                    case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
+                    case 42:
+                        message.supportedTools[i] = 42;
+                        break;
+                    }
+            }
             if (object.messageIds) {
                 if (!Array.isArray(object.messageIds))
                     throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.messageIds: array expected");
@@ -2697,30 +2658,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 message.largeContext = object.largeContext | 0;
             if (object.unknown38 != null)
                 message.unknown38 = object.unknown38 | 0;
-            if (object.supportedTools) {
-                if (!Array.isArray(object.supportedTools))
-                    throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.supportedTools: array expected");
-                message.supportedTools = [];
-                for (var i = 0; i < object.supportedTools.length; ++i) {
-                    if (typeof object.supportedTools[i] !== "object")
-                        throw TypeError(".StreamUnifiedChatWithToolsRequest.Request.supportedTools: object expected");
-                    message.supportedTools[i] = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.fromObject(object.supportedTools[i]);
-                }
-            }
-            if (object.chatModeEnum != null)
-                message.chatModeEnum = object.chatModeEnum | 0;
-            if (object.unknown47 != null)
-                message.unknown47 = String(object.unknown47);
-            if (object.unknown48 != null)
-                message.unknown48 = object.unknown48 | 0;
-            if (object.unknown49 != null)
-                message.unknown49 = object.unknown49 | 0;
-            if (object.unknown51 != null)
-                message.unknown51 = object.unknown51 | 0;
-            if (object.unknown53 != null)
-                message.unknown53 = object.unknown53 | 0;
-            if (object.chatMode != null)
-                message.chatMode = String(object.chatMode);
             return message;
         };
 
@@ -2740,8 +2677,8 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             if (options.arrays || options.defaults) {
                 object.messages = [];
                 object.wikiTool = [];
-                object.messageIds = [];
                 object.supportedTools = [];
+                object.messageIds = [];
             }
             if (options.defaults) {
                 object.unknown2 = 0;
@@ -2755,17 +2692,9 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.unknown22 = 0;
                 object.conversationId = "";
                 object.metadata = null;
-                object.unknown27 = 0;
-                object.unknown29 = "";
+                object.isAgentic = false;
                 object.largeContext = 0;
                 object.unknown38 = 0;
-                object.chatModeEnum = 0;
-                object.unknown47 = "";
-                object.unknown48 = 0;
-                object.unknown49 = 0;
-                object.unknown51 = 0;
-                object.unknown53 = 0;
-                object.chatMode = "";
             }
             if (message.messages && message.messages.length) {
                 object.messages = [];
@@ -2799,10 +2728,13 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.conversationId = message.conversationId;
             if (message.metadata != null && message.hasOwnProperty("metadata"))
                 object.metadata = $root.StreamUnifiedChatWithToolsRequest.Request.Metadata.toObject(message.metadata, options);
-            if (message.unknown27 != null && message.hasOwnProperty("unknown27"))
-                object.unknown27 = message.unknown27;
-            if (message.unknown29 != null && message.hasOwnProperty("unknown29"))
-                object.unknown29 = message.unknown29;
+            if (message.isAgentic != null && message.hasOwnProperty("isAgentic"))
+                object.isAgentic = message.isAgentic;
+            if (message.supportedTools && message.supportedTools.length) {
+                object.supportedTools = [];
+                for (var j = 0; j < message.supportedTools.length; ++j)
+                    object.supportedTools[j] = options.enums === String ? $root.ClientSideToolV2[message.supportedTools[j]] === undefined ? message.supportedTools[j] : $root.ClientSideToolV2[message.supportedTools[j]] : message.supportedTools[j];
+            }
             if (message.messageIds && message.messageIds.length) {
                 object.messageIds = [];
                 for (var j = 0; j < message.messageIds.length; ++j)
@@ -2812,25 +2744,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
                 object.largeContext = message.largeContext;
             if (message.unknown38 != null && message.hasOwnProperty("unknown38"))
                 object.unknown38 = message.unknown38;
-            if (message.supportedTools && message.supportedTools.length) {
-                object.supportedTools = [];
-                for (var j = 0; j < message.supportedTools.length; ++j)
-                    object.supportedTools[j] = $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool.toObject(message.supportedTools[j], options);
-            }
-            if (message.chatModeEnum != null && message.hasOwnProperty("chatModeEnum"))
-                object.chatModeEnum = message.chatModeEnum;
-            if (message.unknown47 != null && message.hasOwnProperty("unknown47"))
-                object.unknown47 = message.unknown47;
-            if (message.unknown48 != null && message.hasOwnProperty("unknown48"))
-                object.unknown48 = message.unknown48;
-            if (message.unknown49 != null && message.hasOwnProperty("unknown49"))
-                object.unknown49 = message.unknown49;
-            if (message.unknown51 != null && message.hasOwnProperty("unknown51"))
-                object.unknown51 = message.unknown51;
-            if (message.unknown53 != null && message.hasOwnProperty("unknown53"))
-                object.unknown53 = message.unknown53;
-            if (message.chatMode != null && message.hasOwnProperty("chatMode"))
-                object.chatMode = message.chatMode;
             return object;
         };
 
@@ -5269,303 +5182,6 @@ $root.StreamUnifiedChatWithToolsRequest = (function() {
             };
 
             return MessageId;
-        })();
-
-        Request.SupportedTool = (function() {
-
-            /**
-             * Properties of a SupportedTool.
-             * @memberof StreamUnifiedChatWithToolsRequest.Request
-             * @interface ISupportedTool
-             * @property {ClientSideToolV2|null} [tool] SupportedTool tool
-             */
-
-            /**
-             * Constructs a new SupportedTool.
-             * @memberof StreamUnifiedChatWithToolsRequest.Request
-             * @classdesc Represents a SupportedTool.
-             * @implements ISupportedTool
-             * @constructor
-             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool=} [properties] Properties to set
-             */
-            function SupportedTool(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-
-            /**
-             * SupportedTool tool.
-             * @member {ClientSideToolV2} tool
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @instance
-             */
-            SupportedTool.prototype.tool = 0;
-
-            /**
-             * Creates a new SupportedTool instance using the specified properties.
-             * @function create
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool=} [properties] Properties to set
-             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool instance
-             */
-            SupportedTool.create = function create(properties) {
-                return new SupportedTool(properties);
-            };
-
-            /**
-             * Encodes the specified SupportedTool message. Does not implicitly {@link StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify|verify} messages.
-             * @function encode
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool} message SupportedTool message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            SupportedTool.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.tool != null && Object.hasOwnProperty.call(message, "tool"))
-                    writer.uint32(/* id 1, wireType 0 =*/8).int32(message.tool);
-                return writer;
-            };
-
-            /**
-             * Encodes the specified SupportedTool message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsRequest.Request.SupportedTool.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsRequest.Request.ISupportedTool} message SupportedTool message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            SupportedTool.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-
-            /**
-             * Decodes a SupportedTool message from the specified reader or buffer.
-             * @function decode
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            SupportedTool.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1: {
-                            message.tool = reader.int32();
-                            break;
-                        }
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-
-            /**
-             * Decodes a SupportedTool message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            SupportedTool.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-
-            /**
-             * Verifies a SupportedTool message.
-             * @function verify
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            SupportedTool.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.tool != null && message.hasOwnProperty("tool"))
-                    switch (message.tool) {
-                    default:
-                        return "tool: enum value expected";
-                    case 0:
-                    case 1:
-                    case 3:
-                    case 5:
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 11:
-                    case 12:
-                    case 15:
-                    case 16:
-                    case 18:
-                    case 19:
-                    case 23:
-                    case 31:
-                    case 42:
-                        break;
-                    }
-                return null;
-            };
-
-            /**
-             * Creates a SupportedTool message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} SupportedTool
-             */
-            SupportedTool.fromObject = function fromObject(object) {
-                if (object instanceof $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool)
-                    return object;
-                var message = new $root.StreamUnifiedChatWithToolsRequest.Request.SupportedTool();
-                switch (object.tool) {
-                default:
-                    if (typeof object.tool === "number") {
-                        message.tool = object.tool;
-                        break;
-                    }
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_UNSPECIFIED":
-                case 0:
-                    message.tool = 0;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES":
-                case 1:
-                    message.tool = 1;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH":
-                case 3:
-                    message.tool = 3;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_READ_FILE":
-                case 5:
-                    message.tool = 5;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_LIST_DIR":
-                case 6:
-                    message.tool = 6;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_EDIT_FILE":
-                case 7:
-                    message.tool = 7;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_FILE_SEARCH":
-                case 8:
-                    message.tool = 8;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL":
-                case 9:
-                    message.tool = 9;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_DELETE_FILE":
-                case 11:
-                    message.tool = 11;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_REAPPLY":
-                case 12:
-                    message.tool = 12;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2":
-                case 15:
-                    message.tool = 15;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_FETCH_RULES":
-                case 16:
-                    message.tool = 16;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_WEB_SEARCH":
-                case 18:
-                    message.tool = 18;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_MCP":
-                case 19:
-                    message.tool = 19;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS":
-                case 23:
-                    message.tool = 23;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION":
-                case 31:
-                    message.tool = 31;
-                    break;
-                case "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH":
-                case 42:
-                    message.tool = 42;
-                    break;
-                }
-                return message;
-            };
-
-            /**
-             * Creates a plain object from a SupportedTool message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {StreamUnifiedChatWithToolsRequest.Request.SupportedTool} message SupportedTool
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            SupportedTool.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults)
-                    object.tool = options.enums === String ? "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" : 0;
-                if (message.tool != null && message.hasOwnProperty("tool"))
-                    object.tool = options.enums === String ? $root.ClientSideToolV2[message.tool] === undefined ? message.tool : $root.ClientSideToolV2[message.tool] : message.tool;
-                return object;
-            };
-
-            /**
-             * Converts this SupportedTool to JSON.
-             * @function toJSON
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            SupportedTool.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-
-            /**
-             * Gets the default type url for SupportedTool
-             * @function getTypeUrl
-             * @memberof StreamUnifiedChatWithToolsRequest.Request.SupportedTool
-             * @static
-             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns {string} The default type url
-             */
-            SupportedTool.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                if (typeUrlPrefix === undefined) {
-                    typeUrlPrefix = "type.googleapis.com";
-                }
-                return typeUrlPrefix + "/StreamUnifiedChatWithToolsRequest.Request.SupportedTool";
-            };
-
-            return SupportedTool;
         })();
 
         return Request;

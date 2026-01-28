@@ -15,10 +15,14 @@ const {
   DEFAULT_AGENT_TOOLS,
 } = require('../utils/utils.js');
 const { ToolExecutor } = require('../utils/toolExecutor.js');
+const { BidiCursorClient } = require('../utils/bidiClient.js');
 
 router.get("/models", async (req, res) => {
   try{
     let bearerToken = req.headers.authorization?.replace('Bearer ', '');
+    if (!bearerToken) {
+      return res.status(401).json({ error: "Missing Authorization header" });
+    }
     let authToken = bearerToken.split(',').map((key) => key.trim())[0];
     if (authToken && authToken.includes('%3A%3A')) {
       authToken = authToken.split('%3A%3A')[1];
@@ -88,6 +92,10 @@ router.post('/chat/completions', async (req, res) => {
     const agentMode = tools && Array.isArray(tools) && tools.length > 0;
     
     let bearerToken = req.headers.authorization?.replace('Bearer ', '');
+    if (!bearerToken) {
+      return res.status(401).json({ error: 'Missing Authorization header' });
+    }
+    
     const keys = bearerToken.split(',').map((key) => key.trim());
     // Randomly select one key to use
     let authToken = keys[Math.floor(Math.random() * keys.length)]
@@ -105,6 +113,43 @@ router.post('/chat/completions', async (req, res) => {
       authToken = authToken.split('::')[1];
     }
 
+    // Use bidirectional client for agent mode (required for tool calling)
+    if (agentMode) {
+      console.log('Agent mode: using bidirectional HTTP/2 client');
+      
+      const bidiClient = new BidiCursorClient(process.cwd());
+      const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+      
+      try {
+        const response = await bidiClient.runAgent(authToken, prompt, model, {
+          maxToolCalls: 10,
+          verbose: true,
+          timeout: 60000,
+        });
+        
+        // Return OpenAI-compatible response
+        return res.json({
+          id: `chatcmpl-${uuidv4()}`,
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: model,
+          choices: [{
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: response,
+            },
+            finish_reason: 'stop',
+          }],
+          usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        });
+      } catch (err) {
+        console.error('Bidi client error:', err);
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
+    // Non-agent mode: use regular unidirectional streaming
     const cursorChecksum = req.headers['x-cursor-checksum']
       ?? generateCursorChecksum(authToken.trim());
 
@@ -140,10 +185,10 @@ router.post('/chat/completions', async (req, res) => {
       },
     })
     
-    // Generate request body with agent mode if tools provided
+    // Generate request body (non-agent mode)
     const cursorBody = generateCursorBody(messages, model, { 
-      agentMode, 
-      tools: DEFAULT_AGENT_TOOLS 
+      agentMode: false, 
+      tools: [] 
     });
     
     const dispatcher = config.proxy.enabled

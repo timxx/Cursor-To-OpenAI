@@ -97,10 +97,8 @@ function generateCursorBody(messages, modelName, options = {}) {
     return summaryId ? { role, messageId, summaryId } : { role, messageId };
   });
 
-  // Build supported tools array for agent mode
-  const supportedTools = agentMode 
-    ? tools.map(tool => ({ tool }))
-    : [];
+  // Build supported tools array for agent mode - TASK-7 says field 29 is repeated ClientSideToolV2
+  const supportedTools = agentMode ? tools : [];
 
   const body = {
     request:{
@@ -136,22 +134,18 @@ function generateCursorBody(messages, modelName, options = {}) {
         path: process.execPath,
         timestamp: new Date().toISOString(),
       },
-      unknown27: 0,
-      //unknown29: "",
+      // Agent mode fields - see TASK-7-protobuf-schemas.md
+      ...(agentMode ? { isAgentic: true, supportedTools } : {}),
       messageIds: messageIds,
       largeContext: 0,
       unknown38: 0,
-      ...(agentMode ? { supportedTools } : {}),
-      chatModeEnum: chatModeEnum,
-      unknown47: "",
-      unknown48: 0,
-      unknown49: 0,
-      unknown51: 0,
-      unknown53: 1,
-      chatMode: chatMode
     }
   };
 
+  if (agentMode) {
+    console.log('Agent mode: isAgentic=', body.request.isAgentic, 'supportedTools=', body.request.supportedTools);
+  }
+  
   const errMsg = $root.StreamUnifiedChatWithToolsRequest.verify(body);
   if (errMsg) throw Error(errMsg);
   const instance = $root.StreamUnifiedChatWithToolsRequest.create(body);
@@ -192,6 +186,12 @@ function chunkToUtf8String(chunk) {
       if (magicNumber == 0 || magicNumber == 1) {
         const gunzipData = magicNumber == 0 ? data : zlib.gunzipSync(data)
         const response = $root.StreamUnifiedChatWithToolsResponse.decode(gunzipData);
+        
+        // Debug: check for tool call patterns in raw data
+        const rawStr = gunzipData.toString('utf-8');
+        if (rawStr.includes('toolu_bdrk_') || rawStr.includes('list_dir')) {
+          console.log('Found tool pattern in raw data:', rawStr.substring(0, 200));
+        }
 
         const thinking = response?.message?.thinking?.content
         if (thinking !== undefined){
@@ -205,6 +205,9 @@ function chunkToUtf8String(chunk) {
 
         // Check for tool calls (agent mode)
         const toolCall = response?.toolCall
+        if (toolCall) {
+          console.log('Found toolCall in response:', JSON.stringify(toolCall));
+        }
         if (toolCall && toolCall.toolCallId) {
           toolCalls.push({
             tool: toolCall.tool,
@@ -212,6 +215,11 @@ function chunkToUtf8String(chunk) {
             name: toolCall.name,
             rawArgs: toolCall.rawArgs,
           });
+        }
+        
+        // Also log raw response for debugging
+        if (response && !response.message && !response.toolCall) {
+          console.log('Response without message or toolCall:', Object.keys(response));
         }
         
       }
