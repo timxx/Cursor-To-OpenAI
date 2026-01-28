@@ -70,9 +70,21 @@ curl http://localhost:3010/v1/chat/completions \
 
 ### With Crush CLI
 
-Configure `~/.local/share/crush/crush.json`:
+[Crush](https://github.com/charmbracelet/crush) is a terminal-based AI assistant. Configure it to use this proxy:
+
+**1. Install Crush**
+```bash
+# macOS/Linux
+brew install charmbracelet/tap/crush
+
+# Or download from GitHub releases
+```
+
+**2. Configure provider** in `~/.local/share/crush/crush.json`:
 ```json
 {
+  "default_provider": "cursor-bridge",
+  "default_model": "claude-4.5-opus-high-thinking",
   "providers": {
     "cursor-bridge": {
       "kind": "openai",
@@ -82,6 +94,26 @@ Configure `~/.local/share/crush/crush.json`:
   }
 }
 ```
+
+**3. Start the proxy** (in a separate terminal):
+```bash
+cd cursor-to-openai
+npm start
+```
+
+**4. Run Crush**:
+```bash
+# Interactive TUI
+crush
+
+# One-shot query
+crush run "list files in current directory"
+
+# With specific model
+crush --model claude-3.5-sonnet run "explain this code"
+```
+
+Crush will automatically use agent mode with tool calling when appropriate, allowing the AI to execute commands, read files, and perform other tasks locally.
 
 ## API Endpoints
 
@@ -122,12 +154,6 @@ Extract token from Cursor's IndexedDB or use the auth reader script.
 ```bash
 curl http://localhost:3010/cursor/loginDeepControl \
   -H "Authorization: Bearer YOUR_WORKOS_SESSION_TOKEN"
-```
-
-## Docker
-
-```bash
-docker run -d --name cursor-to-openai -p 3010:3010 ghcr.io/jiuz-chn/cursor-to-openai:latest
 ```
 
 ## Architecture
