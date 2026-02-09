@@ -5198,7 +5198,7 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
      * @interface IStreamUnifiedChatWithToolsResponse
      * @property {string|null} [text] StreamUnifiedChatWithToolsResponse text
      * @property {string|null} [serverBubbleId] StreamUnifiedChatWithToolsResponse serverBubbleId
-     * @property {string|null} [debuggingOnlyChatPrompt] StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt
+     * @property {StreamUnifiedChatWithToolsResponse.IResponseMessage|null} [message] StreamUnifiedChatWithToolsResponse message
      * @property {number|null} [debuggingOnlyTokenCount] StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount
      * @property {StreamUnifiedChatWithToolsResponse.IThinking|null} [thinking] StreamUnifiedChatWithToolsResponse thinking
      * @property {StreamUnifiedChatWithToolsResponse.IToolCallV2|null} [toolCallV2] StreamUnifiedChatWithToolsResponse toolCallV2
@@ -5237,12 +5237,12 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
     StreamUnifiedChatWithToolsResponse.prototype.serverBubbleId = "";
 
     /**
-     * StreamUnifiedChatWithToolsResponse debuggingOnlyChatPrompt.
-     * @member {string} debuggingOnlyChatPrompt
+     * StreamUnifiedChatWithToolsResponse message.
+     * @member {StreamUnifiedChatWithToolsResponse.IResponseMessage|null|undefined} message
      * @memberof StreamUnifiedChatWithToolsResponse
      * @instance
      */
-    StreamUnifiedChatWithToolsResponse.prototype.debuggingOnlyChatPrompt = "";
+    StreamUnifiedChatWithToolsResponse.prototype.message = null;
 
     /**
      * StreamUnifiedChatWithToolsResponse debuggingOnlyTokenCount.
@@ -5302,8 +5302,8 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             writer = $Writer.create();
         if (message.text != null && Object.hasOwnProperty.call(message, "text"))
             writer.uint32(/* id 1, wireType 2 =*/10).string(message.text);
-        if (message.debuggingOnlyChatPrompt != null && Object.hasOwnProperty.call(message, "debuggingOnlyChatPrompt"))
-            writer.uint32(/* id 2, wireType 2 =*/18).string(message.debuggingOnlyChatPrompt);
+        if (message.message != null && Object.hasOwnProperty.call(message, "message"))
+            $root.StreamUnifiedChatWithToolsResponse.ResponseMessage.encode(message.message, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
         if (message.debuggingOnlyTokenCount != null && Object.hasOwnProperty.call(message, "debuggingOnlyTokenCount"))
             writer.uint32(/* id 3, wireType 0 =*/24).int32(message.debuggingOnlyTokenCount);
         if (message.toolCall != null && Object.hasOwnProperty.call(message, "toolCall"))
@@ -5357,7 +5357,7 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
                     break;
                 }
             case 2: {
-                    message.debuggingOnlyChatPrompt = reader.string();
+                    message.message = $root.StreamUnifiedChatWithToolsResponse.ResponseMessage.decode(reader, reader.uint32());
                     break;
                 }
             case 3: {
@@ -5417,9 +5417,11 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         if (message.serverBubbleId != null && message.hasOwnProperty("serverBubbleId"))
             if (!$util.isString(message.serverBubbleId))
                 return "serverBubbleId: string expected";
-        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
-            if (!$util.isString(message.debuggingOnlyChatPrompt))
-                return "debuggingOnlyChatPrompt: string expected";
+        if (message.message != null && message.hasOwnProperty("message")) {
+            var error = $root.StreamUnifiedChatWithToolsResponse.ResponseMessage.verify(message.message);
+            if (error)
+                return "message." + error;
+        }
         if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
             if (!$util.isInteger(message.debuggingOnlyTokenCount))
                 return "debuggingOnlyTokenCount: integer expected";
@@ -5457,8 +5459,11 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
             message.text = String(object.text);
         if (object.serverBubbleId != null)
             message.serverBubbleId = String(object.serverBubbleId);
-        if (object.debuggingOnlyChatPrompt != null)
-            message.debuggingOnlyChatPrompt = String(object.debuggingOnlyChatPrompt);
+        if (object.message != null) {
+            if (typeof object.message !== "object")
+                throw TypeError(".StreamUnifiedChatWithToolsResponse.message: object expected");
+            message.message = $root.StreamUnifiedChatWithToolsResponse.ResponseMessage.fromObject(object.message);
+        }
         if (object.debuggingOnlyTokenCount != null)
             message.debuggingOnlyTokenCount = object.debuggingOnlyTokenCount | 0;
         if (object.thinking != null) {
@@ -5494,7 +5499,7 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         var object = {};
         if (options.defaults) {
             object.text = "";
-            object.debuggingOnlyChatPrompt = "";
+            object.message = null;
             object.debuggingOnlyTokenCount = 0;
             object.toolCall = null;
             object.serverBubbleId = "";
@@ -5503,8 +5508,8 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         }
         if (message.text != null && message.hasOwnProperty("text"))
             object.text = message.text;
-        if (message.debuggingOnlyChatPrompt != null && message.hasOwnProperty("debuggingOnlyChatPrompt"))
-            object.debuggingOnlyChatPrompt = message.debuggingOnlyChatPrompt;
+        if (message.message != null && message.hasOwnProperty("message"))
+            object.message = $root.StreamUnifiedChatWithToolsResponse.ResponseMessage.toObject(message.message, options);
         if (message.debuggingOnlyTokenCount != null && message.hasOwnProperty("debuggingOnlyTokenCount"))
             object.debuggingOnlyTokenCount = message.debuggingOnlyTokenCount;
         if (message.toolCall != null && message.hasOwnProperty("toolCall"))
@@ -5543,6 +5548,261 @@ $root.StreamUnifiedChatWithToolsResponse = (function() {
         }
         return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse";
     };
+
+    StreamUnifiedChatWithToolsResponse.ResponseMessage = (function() {
+
+        /**
+         * Properties of a ResponseMessage.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @interface IResponseMessage
+         * @property {string|null} [content] ResponseMessage content
+         * @property {string|null} [messageId] ResponseMessage messageId
+         * @property {IMessageThinking|null} [thinking] ResponseMessage thinking
+         */
+
+        /**
+         * Constructs a new ResponseMessage.
+         * @memberof StreamUnifiedChatWithToolsResponse
+         * @classdesc Represents a ResponseMessage.
+         * @implements IResponseMessage
+         * @constructor
+         * @param {StreamUnifiedChatWithToolsResponse.IResponseMessage=} [properties] Properties to set
+         */
+        function ResponseMessage(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ResponseMessage content.
+         * @member {string} content
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @instance
+         */
+        ResponseMessage.prototype.content = "";
+
+        /**
+         * ResponseMessage messageId.
+         * @member {string} messageId
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @instance
+         */
+        ResponseMessage.prototype.messageId = "";
+
+        /**
+         * ResponseMessage thinking.
+         * @member {IMessageThinking|null|undefined} thinking
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @instance
+         */
+        ResponseMessage.prototype.thinking = null;
+
+        /**
+         * Creates a new ResponseMessage instance using the specified properties.
+         * @function create
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IResponseMessage=} [properties] Properties to set
+         * @returns {StreamUnifiedChatWithToolsResponse.ResponseMessage} ResponseMessage instance
+         */
+        ResponseMessage.create = function create(properties) {
+            return new ResponseMessage(properties);
+        };
+
+        /**
+         * Encodes the specified ResponseMessage message. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ResponseMessage.verify|verify} messages.
+         * @function encode
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IResponseMessage} message ResponseMessage message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ResponseMessage.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.content != null && Object.hasOwnProperty.call(message, "content"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.content);
+            if (message.messageId != null && Object.hasOwnProperty.call(message, "messageId"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.messageId);
+            if (message.thinking != null && Object.hasOwnProperty.call(message, "thinking"))
+                $root.MessageThinking.encode(message.thinking, writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ResponseMessage message, length delimited. Does not implicitly {@link StreamUnifiedChatWithToolsResponse.ResponseMessage.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.IResponseMessage} message ResponseMessage message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ResponseMessage.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ResponseMessage message from the specified reader or buffer.
+         * @function decode
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {StreamUnifiedChatWithToolsResponse.ResponseMessage} ResponseMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ResponseMessage.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.StreamUnifiedChatWithToolsResponse.ResponseMessage();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1: {
+                        message.content = reader.string();
+                        break;
+                    }
+                case 2: {
+                        message.messageId = reader.string();
+                        break;
+                    }
+                case 25: {
+                        message.thinking = $root.MessageThinking.decode(reader, reader.uint32());
+                        break;
+                    }
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ResponseMessage message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {StreamUnifiedChatWithToolsResponse.ResponseMessage} ResponseMessage
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ResponseMessage.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ResponseMessage message.
+         * @function verify
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ResponseMessage.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.content != null && message.hasOwnProperty("content"))
+                if (!$util.isString(message.content))
+                    return "content: string expected";
+            if (message.messageId != null && message.hasOwnProperty("messageId"))
+                if (!$util.isString(message.messageId))
+                    return "messageId: string expected";
+            if (message.thinking != null && message.hasOwnProperty("thinking")) {
+                var error = $root.MessageThinking.verify(message.thinking);
+                if (error)
+                    return "thinking." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a ResponseMessage message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {StreamUnifiedChatWithToolsResponse.ResponseMessage} ResponseMessage
+         */
+        ResponseMessage.fromObject = function fromObject(object) {
+            if (object instanceof $root.StreamUnifiedChatWithToolsResponse.ResponseMessage)
+                return object;
+            var message = new $root.StreamUnifiedChatWithToolsResponse.ResponseMessage();
+            if (object.content != null)
+                message.content = String(object.content);
+            if (object.messageId != null)
+                message.messageId = String(object.messageId);
+            if (object.thinking != null) {
+                if (typeof object.thinking !== "object")
+                    throw TypeError(".StreamUnifiedChatWithToolsResponse.ResponseMessage.thinking: object expected");
+                message.thinking = $root.MessageThinking.fromObject(object.thinking);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ResponseMessage message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {StreamUnifiedChatWithToolsResponse.ResponseMessage} message ResponseMessage
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ResponseMessage.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.content = "";
+                object.messageId = "";
+                object.thinking = null;
+            }
+            if (message.content != null && message.hasOwnProperty("content"))
+                object.content = message.content;
+            if (message.messageId != null && message.hasOwnProperty("messageId"))
+                object.messageId = message.messageId;
+            if (message.thinking != null && message.hasOwnProperty("thinking"))
+                object.thinking = $root.MessageThinking.toObject(message.thinking, options);
+            return object;
+        };
+
+        /**
+         * Converts this ResponseMessage to JSON.
+         * @function toJSON
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ResponseMessage.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Gets the default type url for ResponseMessage
+         * @function getTypeUrl
+         * @memberof StreamUnifiedChatWithToolsResponse.ResponseMessage
+         * @static
+         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns {string} The default type url
+         */
+        ResponseMessage.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+            if (typeUrlPrefix === undefined) {
+                typeUrlPrefix = "type.googleapis.com";
+            }
+            return typeUrlPrefix + "/StreamUnifiedChatWithToolsResponse.ResponseMessage";
+        };
+
+        return ResponseMessage;
+    })();
 
     StreamUnifiedChatWithToolsResponse.Thinking = (function() {
 

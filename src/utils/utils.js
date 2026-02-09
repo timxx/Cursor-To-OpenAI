@@ -186,40 +186,51 @@ function chunkToUtf8String(chunk) {
       if (magicNumber == 0 || magicNumber == 1) {
         const gunzipData = magicNumber == 0 ? data : zlib.gunzipSync(data)
         const response = $root.StreamUnifiedChatWithToolsResponse.decode(gunzipData);
-        
-        // Debug: check for tool call patterns in raw data
-        const rawStr = gunzipData.toString('utf-8');
-        if (rawStr.includes('toolu_bdrk_') || rawStr.includes('list_dir')) {
-          console.log('Found tool pattern in raw data:', rawStr.substring(0, 200));
+
+        // --- Extract thinking ---
+        // Agent mode: top-level field 25
+        const topThinking = response?.thinking?.content
+        if (topThinking) {
+          thinkingOutput.push(topThinking)
+        }
+        // Ask mode: field 2 nested message → sub-field 25
+        const nestedThinking = response?.message?.thinking?.content
+        if (nestedThinking) {
+          thinkingOutput.push(nestedThinking)
         }
 
-        const thinking = response?.message?.thinking?.content
-        if (thinking !== undefined){
-          thinkingOutput.push(thinking)
+        // --- Extract text content ---
+        // Agent mode: top-level field 1 (response.text)
+        const topText = response?.text
+        if (topText) {
+          textOutput.push(topText)
+        }
+        // Ask mode: field 2 nested message → sub-field 1 (response.message.content)
+        const nestedText = response?.message?.content
+        if (nestedText) {
+          textOutput.push(nestedText)
         }
 
-        const content = response?.message?.content
-        if (content !== undefined){
-          textOutput.push(content)
-        }
-
-        // Check for tool calls (agent mode)
-        const toolCall = response?.toolCall
-        if (toolCall) {
-          console.log('Found toolCall in response:', JSON.stringify(toolCall));
-        }
-        if (toolCall && toolCall.toolCallId) {
+        // Check for tool calls v2 (agent mode, field 36)
+        const toolCallV2 = response?.toolCallV2
+        if (toolCallV2 && toolCallV2.toolCallId) {
           toolCalls.push({
-            tool: toolCall.tool,
-            toolCallId: toolCall.toolCallId,
-            name: toolCall.name,
-            rawArgs: toolCall.rawArgs,
+            tool: toolCallV2.tool,
+            toolCallId: toolCallV2.toolCallId,
+            name: toolCallV2.name,
+            rawArgs: toolCallV2.rawArgs,
           });
         }
-        
-        // Also log raw response for debugging
-        if (response && !response.message && !response.toolCall) {
-          console.log('Response without message or toolCall:', Object.keys(response));
+
+        // Check for legacy tool call v1 (field 13)
+        const toolCall = response?.toolCall
+        if (toolCall && toolCall.toolCallId) {
+          toolCalls.push({
+            tool: toolCall.tool || 0,
+            toolCallId: toolCall.toolCallId,
+            name: toolCall.name,
+            rawArgs: toolCall.arguments || '',
+          });
         }
         
       }

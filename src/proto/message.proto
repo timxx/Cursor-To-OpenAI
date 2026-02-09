@@ -138,17 +138,24 @@ message StreamUnifiedChatWithToolsRequest {
 // StreamUnifiedChatResponse - see TASK-7-protobuf-schemas.md
 // Main response message from StreamUnifiedChatWithTools
 message StreamUnifiedChatWithToolsResponse {
-  // Main text content - field 1
+  // Main text content - field 1 (used in Agent mode)
   string text = 1;
   
   // Server bubble ID
   string server_bubble_id = 22;
   
-  // Debugging fields
-  string debugging_only_chat_prompt = 2;
+  // Field 2: nested message containing content (Ask mode uses this)
+  // Wire format observed: sub-field 1 = content string, sub-field 25 = thinking
+  message ResponseMessage {
+    string content = 1;
+    string message_id = 2;
+    MessageThinking thinking = 25;
+  }
+  ResponseMessage message = 2;
+  
   int32 debugging_only_token_count = 3;
   
-  // Thinking/reasoning - field 25
+  // Thinking/reasoning - field 25 (top-level, used in Agent mode)
   message Thinking {
     string content = 1;
   }
