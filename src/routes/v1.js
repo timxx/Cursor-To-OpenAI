@@ -118,7 +118,12 @@ router.post('/chat/completions', async (req, res) => {
       console.log('Agent mode: using bidirectional HTTP/2 client, stream=' + stream);
       
       const bidiClient = new BidiCursorClient(process.cwd());
-      const prompt = messages.map(m => `${m.role}: ${m.content}`).join('\n');
+      // Extract system prompts (instruction) and non-system messages separately
+      const instruction = messages
+        .filter(msg => msg.role === 'system')
+        .map(msg => msg.content)
+        .join('\n');
+      const userMessages = messages.filter(msg => msg.role !== 'system');
       const responseId = `chatcmpl-${uuidv4()}`;
       
       if (stream) {
@@ -128,7 +133,8 @@ router.post('/chat/completions', async (req, res) => {
         res.setHeader('Connection', 'keep-alive');
         
         try {
-          const response = await bidiClient.runAgent(authToken, prompt, model, {
+          const response = await bidiClient.runAgent(authToken, userMessages, model, {
+            instruction: instruction,
             maxToolCalls: 10,
             verbose: true,
             timeout: 60000,
@@ -183,7 +189,8 @@ router.post('/chat/completions', async (req, res) => {
       } else {
         // Non-streaming response for agent mode
         try {
-          const response = await bidiClient.runAgent(authToken, prompt, model, {
+          const response = await bidiClient.runAgent(authToken, userMessages, model, {
+            instruction: instruction,
             maxToolCalls: 10,
             verbose: true,
             timeout: 60000,

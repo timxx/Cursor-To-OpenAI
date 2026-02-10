@@ -395,7 +395,7 @@ class BidiCursorClient extends EventEmitter {
   /**
    * Encode agent request body using protobufjs
    */
-  encodeAgentRequest(messages, modelName, supportedTools = DEFAULT_AGENT_TOOLS) {
+  encodeAgentRequest(messages, modelName, supportedTools = DEFAULT_AGENT_TOOLS, instruction = '') {
     const formattedMessages = messages.map(msg => ({
       content: msg.content,
       role: msg.role === 'user' ? 1 : 2,
@@ -411,7 +411,7 @@ class BidiCursorClient extends EventEmitter {
       request: {
         messages: formattedMessages,
         unknown2: 1,
-        instruction: { instruction: '' },
+        instruction: { instruction: instruction },
         unknown4: 1,
         model: { name: modelName, empty: '' },
         webTool: '',
@@ -662,11 +662,13 @@ class BidiCursorClient extends EventEmitter {
 
   /**
    * Run agent with bidirectional streaming
+   * Messages: Array of role-based messages (user/assistant) - system messages should be provided via instruction
    * Returns a promise that resolves with the full response
    * Response: { content, reasoning } for non-stream, or void if streaming via callbacks
    */
-  async runAgent(authToken, prompt, model = 'claude-4-sonnet', options = {}) {
+  async runAgent(authToken, messages, model = 'claude-4-sonnet', options = {}) {
     const { 
+      instruction = '',  // System prompt/instruction to send to Cursor
       maxToolCalls = 10, 
       verbose = false,
       supportedTools = DEFAULT_AGENT_TOOLS,
@@ -674,6 +676,15 @@ class BidiCursorClient extends EventEmitter {
       onContent = null,  // Callback for streaming content
       onReasoning = null, // Callback for streaming reasoning
     } = options;
+
+    // Normalize messages: ensure it's an array
+    let messageArray = messages;
+    if (typeof messages === 'string') {
+      // Legacy support: if a string is passed, treat it as user message
+      messageArray = [{ role: 'user', content: messages }];
+    } else if (!Array.isArray(messages)) {
+      messageArray = [{ role: 'user', content: String(messages) }];
+    }
 
     // Connect
     await this.connect();
@@ -711,13 +722,15 @@ class BidiCursorClient extends EventEmitter {
         }
       }, 500);
 
-      // Send initial request
-      const messages = [{ role: 'user', content: prompt }];
-      const requestBody = this.encodeAgentRequest(messages, model, supportedTools);
+      // Send initial request with instruction (system prompt) support
+      const requestBody = this.encodeAgentRequest(messageArray, model, supportedTools, instruction);
       stream.write(requestBody);
       
       if (verbose) {
         console.log(`Agent mode (bidi) with model: ${model}`);
+        if (instruction) {
+          console.log(`System instruction: ${instruction.substring(0, 100)}...`);
+        }
         console.log(`Sent initial request (${requestBody.length} bytes)`);
       }
 
