@@ -663,6 +663,7 @@ class BidiCursorClient extends EventEmitter {
   /**
    * Run agent with bidirectional streaming
    * Returns a promise that resolves with the full response
+   * Response: { content, reasoning } for non-stream, or void if streaming via callbacks
    */
   async runAgent(authToken, prompt, model = 'claude-4-sonnet', options = {}) {
     const { 
@@ -671,6 +672,7 @@ class BidiCursorClient extends EventEmitter {
       supportedTools = DEFAULT_AGENT_TOOLS,
       timeout = 60000,
       onContent = null,  // Callback for streaming content
+      onReasoning = null, // Callback for streaming reasoning
     } = options;
 
     // Connect
@@ -681,7 +683,8 @@ class BidiCursorClient extends EventEmitter {
       const stream = this.session.request(headers);
       
       // Track state
-      let fullResponse = '';
+      let fullContent = '';
+      let fullReasoning = '';
       const toolCallsSeen = new Set();
       let toolCallsExecuted = 0;
       let buffer = Buffer.alloc(0);
@@ -697,14 +700,14 @@ class BidiCursorClient extends EventEmitter {
             console.log(`\n[Inactivity timeout after ${timeSinceActivity}ms]`);
           }
           stream.close();
-          resolve(fullResponse);
+          resolve({ content: fullContent, reasoning: fullReasoning });
         } else if (timeSinceActivity > timeout) {
           clearInterval(timeoutInterval);
           if (verbose) {
             console.log(`\n[Total timeout]`);
           }
           stream.close();
-          resolve(fullResponse);
+          resolve({ content: fullContent, reasoning: fullReasoning });
         }
       }, 500);
 
@@ -798,13 +801,15 @@ class BidiCursorClient extends EventEmitter {
             const response = ResponseDecoder.decode(data);
             
             if (response.text) {
-              fullResponse += response.text;
+              fullContent += response.text;
               if (verbose) process.stdout.write(response.text);
               if (onContent) onContent(response.text);
             }
             
-            if (response.thinking && verbose) {
-              console.log(`<thinking>${response.thinking}</thinking>`);
+            if (response.thinking) {
+              fullReasoning += response.thinking;
+              if (verbose) process.stdout.write(response.thinking);
+              if (onReasoning) onReasoning(response.thinking);
             }
             
             // Debug: show fields if no text found
@@ -828,7 +833,7 @@ class BidiCursorClient extends EventEmitter {
           }
         }
         this.close();
-        resolve(fullResponse);
+        resolve({ content: fullContent, reasoning: fullReasoning });
       });
 
       stream.on('close', () => {
@@ -838,7 +843,7 @@ class BidiCursorClient extends EventEmitter {
         }
         this.close();
         // Resolve if not already resolved
-        resolve(fullResponse);
+        resolve({ content: fullContent, reasoning: fullReasoning });
       });
 
       stream.on('error', (err) => {

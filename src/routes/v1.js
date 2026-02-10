@@ -132,7 +132,7 @@ router.post('/chat/completions', async (req, res) => {
             maxToolCalls: 10,
             verbose: true,
             timeout: 60000,
-            // Callback to stream content as it arrives
+            // Callbacks to stream content and reasoning as they arrive
             onContent: (content) => {
               res.write(`data: ${JSON.stringify({
                 id: responseId,
@@ -142,6 +142,19 @@ router.post('/chat/completions', async (req, res) => {
                 choices: [{
                   index: 0,
                   delta: { content },
+                  finish_reason: null,
+                }],
+              })}\n\n`);
+            },
+            onReasoning: (reasoning) => {
+              res.write(`data: ${JSON.stringify({
+                id: responseId,
+                object: 'chat.completion.chunk',
+                created: Math.floor(Date.now() / 1000),
+                model: model,
+                choices: [{
+                  index: 0,
+                  delta: { reasoning },
                   finish_reason: null,
                 }],
               })}\n\n`);
@@ -176,7 +189,18 @@ router.post('/chat/completions', async (req, res) => {
             timeout: 60000,
           });
           
-          console.log(`Agent response (${response?.length || 0} chars): "${response?.substring(0, 100)}..."`);
+          console.log(`Agent response (${response.content?.length || 0} chars): "${response.content?.substring(0, 100)}..."`);
+
+          // Build message with separate content and reasoning fields
+          const message = {
+            role: 'assistant',
+            content: response.content || null,
+          };
+
+          // Add reasoning field if thinking exists
+          if (response.reasoning && response.reasoning.trim().length > 0) {
+            message.reasoning = response.reasoning;
+          }
           
           return res.json({
             id: responseId,
@@ -185,10 +209,7 @@ router.post('/chat/completions', async (req, res) => {
             model: model,
             choices: [{
               index: 0,
-              message: {
-                role: 'assistant',
-                content: response,
-              },
+              message: message,
               finish_reason: 'stop',
             }],
             usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
@@ -292,28 +313,16 @@ router.post('/chat/completions', async (req, res) => {
       const responseId = `chatcmpl-${uuidv4()}`;
       const seenToolCalls = new Set();
       let fullText = '';
+      let fullThinking = '';
 
       try {
-        let thinkingStart = "<thinking>";
-        let thinkingEnd = "</thinking>";
         for await (const chunk of response.body) {
           const { thinking, text, toolCalls } = chunkToUtf8String(chunk);
           fullText += text;
-          let content = ""
+          fullThinking += thinking;
 
-          if (thinkingStart !== "" && thinking.length > 0 ){
-            content += thinkingStart + "\n"
-            thinkingStart = ""
-          }
-          content += thinking
-          if (thinkingEnd !== "" && thinking.length === 0 && text.length !== 0 && thinkingStart === "") {
-            content += "\n" + thinkingEnd + "\n"
-            thinkingEnd = ""
-          }
-
-          content += text
-
-          if (content.length > 0) {
+          // Send reasoning content separately
+          if (thinking.length > 0) {
             res.write(
               `data: ${JSON.stringify({
                 id: responseId,
@@ -323,7 +332,25 @@ router.post('/chat/completions', async (req, res) => {
                 choices: [{
                   index: 0,
                   delta: {
-                    content: content,
+                    reasoning: thinking,
+                  },
+                }],
+              })}\n\n`
+            );
+          }
+
+          // Send regular content separately
+          if (text.length > 0) {
+            res.write(
+              `data: ${JSON.stringify({
+                id: responseId,
+                object: 'chat.completion.chunk',
+                created: Math.floor(Date.now() / 1000),
+                model: model,
+                choices: [{
+                  index: 0,
+                  delta: {
+                    content: text,
                   },
                 }],
               })}\n\n`
@@ -411,26 +438,16 @@ router.post('/chat/completions', async (req, res) => {
     } else {
       // Non-streaming response
       try {
-        let thinkingStart = "<thinking>";
-        let thinkingEnd = "</thinking>";
         let content = '';
+        let reasoning = '';
         const allToolCalls = [];
         const seenToolCalls = new Set();
         
         for await (const chunk of response.body) {
           const { thinking, text, toolCalls } = chunkToUtf8String(chunk);
           
-          if (thinkingStart !== "" && thinking.length > 0 ){
-            content += thinkingStart + "\n"
-            thinkingStart = ""
-          }
-          content += thinking
-          if (thinkingEnd !== "" && thinking.length === 0 && text.length !== 0 && thinkingStart === "") {
-            content += "\n" + thinkingEnd + "\n"
-            thinkingEnd = ""
-          }
-
-          content += text
+          content += text;
+          reasoning += thinking;
 
           // Collect tool calls for agent mode
           if (agentMode && toolCalls.length > 0) {
@@ -445,7 +462,8 @@ router.post('/chat/completions', async (req, res) => {
 
         // Try text-based tool call detection if none found
         if (agentMode && allToolCalls.length === 0) {
-          const textToolCalls = parseToolCallsFromText(content);
+          const searchText = content + reasoning;
+          const textToolCalls = parseToolCallsFromText(searchText);
           for (const tc of textToolCalls) {
             if (!seenToolCalls.has(tc.toolCallId)) {
               seenToolCalls.add(tc.toolCallId);
@@ -454,14 +472,16 @@ router.post('/chat/completions', async (req, res) => {
           }
         }
 
-        // Build response message
+        // Build response message with separate reasoning and content fields
         const message = {
           role: 'assistant',
           content: content || null,
         };
 
-        // Add tool calls in OpenAI format if any found
-        // See TASK-26-tool-schemas.md for tool call schema
+        // Add reasoning field if thinking exists
+        if (reasoning && reasoning.trim().length > 0) {
+          message.reasoning = reasoning;
+        }
         if (allToolCalls.length > 0) {
           message.tool_calls = allToolCalls.map((tc, i) => ({
             id: tc.toolCallId,
