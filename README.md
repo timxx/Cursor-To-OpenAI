@@ -2,7 +2,7 @@
 
 OpenAI-compatible API proxy for Cursor Editor with **full agent mode and tool calling support**.
 
-> **Compatible with Cursor 2.3.41** - Protocol implementation based on reverse-engineered protobuf schemas.
+> **Compatible with Cursor 2.6.22** - Protocol implementation based on reverse-engineered protobuf schemas.
 
 ## Features
 
@@ -186,7 +186,7 @@ npm run proto
 
 ## Compatibility
 
-**Tested with Cursor 2.3.41**
+**Tested with Cursor 2.6.22**
 
 The protobuf schemas and protocol details were derived from reverse engineering Cursor's `workbench.desktop.main.js`. Key discoveries:
 - `StreamUnifiedChatWithTools` RPC for bidirectional streaming

@@ -345,7 +345,7 @@ class BidiCursorClient extends EventEmitter {
       'x-amzn-trace-id': `Root=${uuidv4()}`,
       'x-client-key': clientKey,
       'x-cursor-checksum': checksum,
-      'x-cursor-client-version': '2.3.41',
+      'x-cursor-client-version': '2.6.22',
       'x-cursor-client-type': 'ide',
       'x-cursor-client-os': process.platform,
       'x-cursor-client-arch': process.arch,
